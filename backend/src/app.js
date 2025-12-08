@@ -13,8 +13,12 @@ const { testConnection, syncDatabase } = require('./models');
 // Create Express app
 const app = express();
 
-// Security middleware
-app.use(helmet());
+// Security middleware (allow cross-origin resource usage for assets)
+app.use(
+    helmet({
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+    })
+);
 
 // CORS configuration
 app.use(cors({
@@ -50,7 +54,18 @@ if (config.nodeEnv === 'development') {
 }
 
 // Static files (uploads)
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use(
+    '/uploads',
+    cors({
+        origin: config.frontendUrl,
+        credentials: true
+    }),
+    (req, res, next) => {
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        next();
+    },
+    express.static(path.join(__dirname, '..', 'uploads'))
+);
 
 // API routes
 app.use('/api/v1', routes);

@@ -3,8 +3,8 @@ const config = require('../config');
 
 // Create transporter
 const createTransporter = () => {
-    // For development, use Ethereal (fake SMTP)
-    if (config.nodeEnv === 'development' && !config.email.user) {
+    // If no SMTP credentials, defer to Ethereal auto account (even if NODE_ENV=production in local)
+    if (!config.email.user || !config.email.password) {
         return null; // Will create test account on first use
     }
 
@@ -81,6 +81,9 @@ const sendEmail = async ({ to, subject, text, html }) => {
  */
 const sendVerificationEmail = async (to, name, token) => {
     const verificationUrl = `${config.frontendUrl}/verify-email/${token}`;
+
+    // Log the verification link so it can be used in local/dev even if email fails
+    console.log('Email verification link:', verificationUrl);
 
     const subject = 'Smart Campus - Email Doğrulama';
     const text = `Merhaba ${name},\n\nEmail adresinizi doğrulamak için aşağıdaki linke tıklayın:\n${verificationUrl}\n\nBu link 24 saat geçerlidir.`;

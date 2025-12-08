@@ -3,6 +3,7 @@ const router = express.Router();
 
 const authRoutes = require('./authRoutes');
 const userRoutes = require('./userRoutes');
+const departmentRoutes = require('./departmentRoutes');
 
 // Health check endpoint
 router.get('/health', (req, res) => {
@@ -16,5 +17,7 @@ router.get('/health', (req, res) => {
 // Mount routes
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
+router.use('/departments', departmentRoutes);
 
 module.exports = router;
+
