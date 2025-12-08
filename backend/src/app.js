@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 
 const config = require('./config');
 const routes = require('./routes');
@@ -13,10 +15,32 @@ const { testConnection, syncDatabase } = require('./models');
 // Create Express app
 const app = express();
 
-// Security middleware (allow cross-origin resource usage for assets)
+// Swagger API Documentation
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Smart Campus API - Swagger Documentation',
+    swaggerOptions: {
+        persistAuthorization: true,
+        displayRequestDuration: true,
+        docExpansion: 'list',
+        filter: true,
+        showExtensions: true,
+        showCommonExtensions: true
+    }
+}));
+
+// Swagger JSON endpoint
+app.get('/swagger.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+});
+
+
+// Security middleware (Swagger UI için CSP ayarları düzenlendi)
 app.use(
     helmet({
         crossOriginResourcePolicy: { policy: 'cross-origin' },
+        contentSecurityPolicy: false, // Swagger UI için devre dışı
     })
 );
 
@@ -76,10 +100,14 @@ app.get('/', (req, res) => {
         success: true,
         message: 'Smart Campus API Server',
         version: '1.0.0',
+        documentation: '/swagger',
         endpoints: {
+            swagger: '/swagger',
+            swaggerJson: '/swagger.json',
             health: '/api/v1/health',
             auth: '/api/v1/auth',
-            users: '/api/v1/users'
+            users: '/api/v1/users',
+            departments: '/api/v1/departments'
         }
     });
 });
@@ -109,6 +137,7 @@ const startServer = async () => {
 📍 URL: http://localhost:${PORT}
 📊 Environment: ${config.nodeEnv}
 💾 Database: ${config.database.name}
+📚 API Docs: http://localhost:${PORT}/swagger
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       `);
         });

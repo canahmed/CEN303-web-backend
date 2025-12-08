@@ -92,7 +92,23 @@ docker-compose up -d
 docker-compose logs -f backend
 ```
 
+## 📚 API Dokümantasyonu (Swagger)
+
+Backend çalışırken Swagger UI üzerinden interaktif API dokümantasyonuna erişebilirsiniz:
+
+- **Swagger UI:** http://localhost:5000/api-docs
+- **OpenAPI JSON:** http://localhost:5000/api-docs.json
+
+### Swagger Özellikleri
+
+- 🔐 JWT Bearer Authentication desteği
+- 📝 Tüm endpoint'ler için detaylı açıklamalar
+- 📋 Request/Response örnekleri
+- ✅ Validation kuralları
+- 🏷️ Endpoint gruplandırması (Tags)
+
 ## 📡 API Endpoints
+
 
 ### Authentication (`/api/v1/auth`)
 
