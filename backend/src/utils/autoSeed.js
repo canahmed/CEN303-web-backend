@@ -1,5 +1,5 @@
-const { User, Department, Student, Faculty, sequelize } = require('../src/models');
-const { hashPassword } = require('../src/utils/hash');
+const { User, Department, Student, Faculty, sequelize } = require('../models');
+const { hashPassword } = require('./hash');
 
 /**
  * Checks if database needs seeding and seeds if necessary
