@@ -11,6 +11,7 @@ const config = require('./config');
 const routes = require('./routes');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const { testConnection, syncDatabase } = require('./models');
+const { autoSeed } = require('./utils/autoSeed');
 
 // Create Express app
 const app = express();
@@ -141,10 +142,17 @@ const startServer = async () => {
         await testConnection();
 
         // Sync database (create tables if not exist)
-        // In production, use migrations instead
+        // Development: alter=true (modify existing tables)
+        // Production: create tables if they don't exist
         if (config.nodeEnv === 'development') {
             await syncDatabase({ alter: true });
+        } else {
+            // Production: only create if not exists (safe for existing data)
+            await syncDatabase({ alter: false });
         }
+
+        // Auto-seed database if empty (safe to run multiple times)
+        await autoSeed();
 
         // Start listening
         const PORT = config.port;

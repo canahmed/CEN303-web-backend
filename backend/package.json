@@ -9,6 +9,8 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
+    "build": "echo 'No build step needed'",
+    "seed:prod": "node seeders/seed.js",
     "test": "jest --coverage --detectOpenHandles",
     "test:unit": "jest tests/unit --coverage",
     "test:integration": "jest tests/integration --coverage",
