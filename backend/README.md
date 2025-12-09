@@ -96,8 +96,8 @@ docker-compose logs -f backend
 
 Backend çalışırken Swagger UI üzerinden interaktif API dokümantasyonuna erişebilirsiniz:
 
-- **Swagger UI:** http://localhost:5000/api-docs
-- **OpenAPI JSON:** http://localhost:5000/api-docs.json
+- **Swagger UI:** http://localhost:5000/swagger
+- **OpenAPI JSON:** http://localhost:5000/swagger.json
 
 ### Swagger Özellikleri
 
@@ -161,3 +161,10 @@ Smart Campus Development Team
 ## 📄 Lisans
 
 MIT License
+
+## CORS ve Frontend URL Ayarları
+
+- CORS izinleri `FRONTEND_URL` ortam değişkeninde **virgül ile ayrılmış** liste olarak tanımlanır (.env veya docker-compose).
+- Örnek: `FRONTEND_URL=http://localhost:5173,https://your-vercel-domain.vercel.app`
+- Yeni bir frontend (Vercel domaini gibi) eklendiğinde bu listeye ekleyin; aksi halde CORS hata verir.
+- Lokal backend taban URL: `http://localhost:5000/api/v1` (PORT=5000, path `/api/v1`).

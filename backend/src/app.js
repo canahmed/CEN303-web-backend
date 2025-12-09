@@ -15,6 +15,23 @@ const { testConnection, syncDatabase } = require('./models');
 // Create Express app
 const app = express();
 
+const allowedOrigins = config.frontendUrls || [config.frontendUrl];
+const isOriginAllowed = (origin) =>
+    !origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin);
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (isOriginAllowed(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 // Swagger API Documentation
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customCss: '.swagger-ui .topbar { display: none }',
@@ -45,12 +62,7 @@ app.use(
 );
 
 // CORS configuration
-app.use(cors({
-    origin: config.frontendUrl,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -81,8 +93,14 @@ if (config.nodeEnv === 'development') {
 app.use(
     '/uploads',
     cors({
-        origin: config.frontendUrl,
-        credentials: true
+        ...corsOptions,
+        origin: (origin, callback) => {
+            if (isOriginAllowed(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        }
     }),
     (req, res, next) => {
         res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
