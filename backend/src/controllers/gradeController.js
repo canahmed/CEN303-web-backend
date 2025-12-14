@@ -1,5 +1,6 @@
 const { Student, Faculty, Enrollment, CourseSection } = require('../models');
 const GradeService = require('../services/gradeService');
+const PDFService = require('../services/pdfService');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -62,12 +63,14 @@ const getTranscriptPdf = async (req, res, next) => {
 
         const transcript = await GradeService.generateTranscript(student.id);
 
-        // Generate simple HTML-based PDF (can be enhanced with PDFKit later)
-        const html = generateTranscriptHtml(transcript);
+        // Generate professional PDF using PDFKit
+        const pdfBuffer = await PDFService.generateTranscriptPdf(transcript);
 
-        res.setHeader('Content-Type', 'text/html');
-        res.setHeader('Content-Disposition', 'attachment; filename=transcript.html');
-        res.send(html);
+        // Set response headers for PDF download
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=transcript_${student.student_number}.pdf`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
 
     } catch (error) {
         next(error);
