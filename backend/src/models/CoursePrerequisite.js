@@ -1,0 +1,35 @@
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+
+const CoursePrerequisite = sequelize.define('CoursePrerequisite', {
+    course_id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        allowNull: false,
+        references: {
+            model: 'courses',
+            key: 'id'
+        },
+        comment: 'Ana ders ID'
+    },
+    prerequisite_course_id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        allowNull: false,
+        references: {
+            model: 'courses',
+            key: 'id'
+        },
+        comment: 'Önkoşul ders ID'
+    }
+}, {
+    tableName: 'course_prerequisites',
+    timestamps: true,
+    underscored: true,
+    indexes: [
+        { fields: ['course_id'] },
+        { fields: ['prerequisite_course_id'] }
+    ]
+});
+
+module.exports = CoursePrerequisite;

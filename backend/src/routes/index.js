@@ -1,9 +1,17 @@
 const express = require('express');
 const router = express.Router();
 
+// Part 1 Routes
 const authRoutes = require('./authRoutes');
 const userRoutes = require('./userRoutes');
 const departmentRoutes = require('./departmentRoutes');
+
+// Part 2 Routes
+const courseRoutes = require('./courseRoutes');
+const sectionRoutes = require('./sectionRoutes');
+const enrollmentRoutes = require('./enrollmentRoutes');
+const gradeRoutes = require('./gradeRoutes');
+const attendanceRoutes = require('./attendanceRoutes');
 
 // Health check endpoint
 router.get('/health', (req, res) => {
@@ -14,10 +22,16 @@ router.get('/health', (req, res) => {
     });
 });
 
-// Mount routes
+// Mount Part 1 routes
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/departments', departmentRoutes);
 
-module.exports = router;
+// Mount Part 2 routes
+router.use('/courses', courseRoutes);
+router.use('/sections', sectionRoutes);
+router.use('/enrollments', enrollmentRoutes);
+router.use('/grades', gradeRoutes);
+router.use('/attendance', attendanceRoutes);
 
+module.exports = router;
