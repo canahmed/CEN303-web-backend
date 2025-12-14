@@ -77,7 +77,7 @@ const limiter = rateLimit({
         }
     }
 });
-app.use('/api/', limiter);
+// app.use('/api/', limiter); // Rate limiter devre dışı - lokal test için
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));

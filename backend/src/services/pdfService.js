@@ -149,7 +149,7 @@ class PDFService {
             doc.fontSize(11)
                 .font('Helvetica-Bold')
                 .fillColor('#2b6cb0')
-                .text(`${semester.year} - ${semester.semester.toUpperCase()} (GPA: ${semester.gpa.toFixed(2)})`);
+                .text(`${semester.year} - ${semester.semester.toUpperCase()} (GPA: ${(semester.gpa ?? 0).toFixed(2)})`);
 
             doc.moveDown(0.3);
 
@@ -184,7 +184,7 @@ class PDFService {
                     .text(course.name.substring(0, 30), col.name, rowY)
                     .text(course.credits.toString(), col.credits, rowY)
                     .text(course.letterGrade || '-', col.grade, rowY)
-                    .text(course.gradePoint !== null ? course.gradePoint.toFixed(2) : '-', col.points, rowY);
+                    .text(typeof course.gradePoint === 'number' ? course.gradePoint.toFixed(2) : '-', col.points, rowY);
 
                 rowY += 14;
             }
@@ -225,7 +225,7 @@ class PDFService {
         doc.fontSize(16)
             .font('Helvetica-Bold')
             .fillColor('#1a365d')
-            .text(transcriptData.cgpa.toFixed(2), 430, doc.y + 22);
+            .text((transcriptData.cgpa ?? 0).toFixed(2), 430, doc.y + 22);
 
         doc.moveDown(3);
     }
