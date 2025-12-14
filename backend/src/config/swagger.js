@@ -12,22 +12,21 @@ const options = {
 Bu API, üniversite kampüsünün günlük operasyonlarını dijitalleştiren ve optimize eden kapsamlı bir web uygulamasının backend servisidir.
 
 ### Part 1 - Kimlik Doğrulama ve Kullanıcı Yönetimi
-
-Bu dokümantasyon, Part 1 kapsamındaki tüm endpoint'leri içerir:
 - **Authentication**: Kayıt, giriş, çıkış, token yenileme, şifre sıfırlama
 - **User Management**: Profil görüntüleme, güncelleme, profil fotoğrafı yükleme
 - **Departments**: Bölüm listeleme
 
-### Kimlik Doğrulama
+### Part 2 - Akademik Yönetim ve GPS Yoklama
+- **Courses**: Ders yönetimi (CRUD, önkoşullar)
+- **Sections**: Ders şubeleri yönetimi
+- **Enrollments**: Derse kayıt, bırakma, önkoşul ve çakışma kontrolü
+- **Grades**: Not girişi, GPA/CGPA, transkript ve PDF
+- **Attendance**: GPS tabanlı yoklama, QR kod, mazeret yönetimi
 
+### Kimlik Doğrulama
 API, JWT (JSON Web Token) tabanlı kimlik doğrulama kullanır:
 - **Access Token**: 15 dakika geçerli
 - **Refresh Token**: 7 gün geçerli
-
-Protected endpoint'lere erişmek için \`Authorization\` header'ında Bearer token gönderilmelidir:
-\`\`\`
-Authorization: Bearer <access_token>
-\`\`\`
             `,
             contact: {
                 name: 'Smart Campus Team',
@@ -42,9 +41,14 @@ Authorization: Bearer <access_token>
             {
                 url: 'http://localhost:5000',
                 description: 'Development Server'
+            },
+            {
+                url: 'https://smart-campus-api-g53d.onrender.com',
+                description: 'Production Server'
             }
         ],
         tags: [
+            // Part 1 Tags
             {
                 name: 'Authentication',
                 description: 'Kimlik doğrulama işlemleri (kayıt, giriş, çıkış, token yenileme, şifre sıfırlama)'
@@ -56,6 +60,27 @@ Authorization: Bearer <access_token>
             {
                 name: 'Departments',
                 description: 'Bölüm listeleme işlemleri'
+            },
+            // Part 2 Tags
+            {
+                name: 'Courses',
+                description: 'Ders yönetimi (listeleme, oluşturma, güncelleme, silme, önkoşullar)'
+            },
+            {
+                name: 'Sections',
+                description: 'Ders şubesi yönetimi (section CRUD, kapasite, program)'
+            },
+            {
+                name: 'Enrollments',
+                description: 'Ders kayıt işlemleri (kayıt olma, bırakma, önkoşul/çakışma kontrolü)'
+            },
+            {
+                name: 'Grades',
+                description: 'Not yönetimi (not girişi, GPA/CGPA hesaplama, transkript, PDF)'
+            },
+            {
+                name: 'Attendance',
+                description: 'Yoklama sistemi (GPS tabanlı, QR kod, mazeret yönetimi)'
             }
         ],
         components: {
