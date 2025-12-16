@@ -15,7 +15,7 @@ const errorHandler = (err, req, res, next) => {
 
     // Handle Sequelize validation errors
     if (err.name === 'SequelizeValidationError') {
-        const messages = err.errors.map(e => e.message).join(', ');
+        const messages = err.errors.map((e) => e.message).join(', ');
         error = ApiError.badRequest(messages);
     }
 
@@ -54,17 +54,14 @@ const errorHandler = (err, req, res, next) => {
     const status = error.status || 'error';
 
     // Send response
-    res
-        .status(statusCode)
-        .type('application/json; charset=utf-8')
-        .json({
-            success: false,
-            error: {
-                code: statusCode === 500 ? 'INTERNAL_ERROR' : err.code || 'ERROR',
-                message,
-                ...(config.nodeEnv === 'development' && { stack: err.stack })
-            }
-        });
+    res.status(statusCode).type('application/json; charset=utf-8').json({
+        success: false,
+        error: {
+            code: statusCode === 500 ? 'INTERNAL_ERROR' : err.code || 'ERROR',
+            message,
+            ...(config.nodeEnv === 'development' && { stack: err.stack }),
+        },
+    });
 };
 
 /**
@@ -76,5 +73,5 @@ const notFound = (req, res, next) => {
 
 module.exports = {
     errorHandler,
-    notFound
+    notFound,
 };
