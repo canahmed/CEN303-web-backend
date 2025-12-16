@@ -12,7 +12,41 @@ const ApiError = require('../utils/ApiError');
 const createSession = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const { section_id, geofence_radius, latitude, longitude } = req.body;
+        let { section_id, geofence_radius, latitude, longitude } = req.body;
+
+        // If section_id is not UUID, try to find by section code or course code
+        if (section_id && !isValidUUID(section_id)) {
+            const section = await CourseSection.findOne({
+                where: {},
+                include: [{
+                    model: require('../models').Course,
+                    as: 'course',
+                    where: { code: section_id }
+                }]
+            });
+
+            if (!section) {
+                // Try finding by section number pattern like "CEN303-01"
+                const parts = section_id.split('-');
+                if (parts.length === 2) {
+                    const courseCode = parts[0];
+                    const sectionNum = parseInt(parts[1]);
+                    const sectionByCode = await CourseSection.findOne({
+                        where: { section_number: sectionNum },
+                        include: [{
+                            model: require('../models').Course,
+                            as: 'course',
+                            where: { code: courseCode }
+                        }]
+                    });
+                    if (sectionByCode) {
+                        section_id = sectionByCode.id;
+                    }
+                }
+            } else {
+                section_id = section.id;
+            }
+        }
 
         const session = await AttendanceService.createSession(section_id, userId, {
             geofenceRadius: geofence_radius,
@@ -29,6 +63,12 @@ const createSession = async (req, res, next) => {
         next(error);
     }
 };
+
+// Helper function to validate UUID
+function isValidUUID(str) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+}
 
 /**
  * Get session details
