@@ -17,8 +17,7 @@ const { autoSeed } = require('./utils/autoSeed');
 const app = express();
 
 const allowedOrigins = config.frontendUrls || [config.frontendUrl];
-const isOriginAllowed = (origin) =>
-    !origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin);
+const isOriginAllowed = (origin) => !origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin);
 
 const corsOptions = {
     origin: (origin, callback) => {
@@ -30,36 +29,39 @@ const corsOptions = {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 // Swagger API Documentation
-app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'Smart Campus API - Swagger Documentation',
-    swaggerOptions: {
-        persistAuthorization: true,
-        displayRequestDuration: true,
-        docExpansion: 'list',
-        filter: true,
-        showExtensions: true,
-        showCommonExtensions: true
-    }
-}));
+app.use(
+    '/swagger',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+        customCss: '.swagger-ui .topbar { display: none }',
+        customSiteTitle: 'Smart Campus API - Swagger Documentation',
+        swaggerOptions: {
+            persistAuthorization: true,
+            displayRequestDuration: true,
+            docExpansion: 'list',
+            filter: true,
+            showExtensions: true,
+            showCommonExtensions: true,
+        },
+    }),
+);
 
 // Swagger JSON endpoint
 app.get('/swagger.json', (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.send(swaggerSpec);
 });
-
 
 // Security middleware (Swagger UI için CSP ayarları düzenlendi)
 app.use(
     helmet({
         crossOriginResourcePolicy: { policy: 'cross-origin' },
         contentSecurityPolicy: false, // Swagger UI için devre dışı
-    })
+    }),
 );
 
 // CORS configuration
@@ -69,13 +71,15 @@ app.use(cors(corsOptions));
 const limiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
     max: config.rateLimit.maxRequests,
+    standardHeaders: true,
+    legacyHeaders: false,
     message: {
         success: false,
         error: {
             code: 'RATE_LIMIT_EXCEEDED',
-            message: 'Çok fazla istek gönderildi. Lütfen daha sonra tekrar deneyin.'
-        }
-    }
+            message: 'Çok fazla istek gönderildi. Lütfen daha sonra tekrar deneyin.',
+        },
+    },
 });
 // app.use('/api/', limiter); // Rate limiter devre dışı - lokal test için
 
@@ -101,13 +105,13 @@ app.use(
             } else {
                 callback(new Error('Not allowed by CORS'));
             }
-        }
+        },
     }),
     (req, res, next) => {
         res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
         next();
     },
-    express.static(path.join(__dirname, '..', 'uploads'))
+    express.static(path.join(__dirname, '..', 'uploads')),
 );
 
 // API routes
@@ -126,8 +130,8 @@ app.get('/', (req, res) => {
             health: '/api/v1/health',
             auth: '/api/v1/auth',
             users: '/api/v1/users',
-            departments: '/api/v1/departments'
-        }
+            departments: '/api/v1/departments',
+        },
     });
 });
 
@@ -138,50 +142,43 @@ app.use(errorHandler);
 // Start server
 const startServer = async () => {
     try {
-        // Test database connection
         await testConnection();
 
-        // Sync database (create tables if not exist)
-        // Development: alter=true (modify existing tables)
-        // Production: create tables if they don't exist
         if (config.nodeEnv === 'development') {
             await syncDatabase({ alter: true });
         } else {
-            // Production: only create if not exists (safe for existing data)
             await syncDatabase({ alter: false });
         }
 
-        // Auto-seed database if empty (safe to run multiple times)
         await autoSeed();
 
-        // Start listening
         const PORT = config.port;
         app.listen(PORT, () => {
             console.log(`
-🚀 Smart Campus API Server
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📍 URL: http://localhost:${PORT}
-📊 Environment: ${config.nodeEnv}
-💾 Database: ${config.database.name}
-📚 API Docs: http://localhost:${PORT}/swagger
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-      `);
+===============================
+ Smart Campus API Server
+-------------------------------
+ URL: http://localhost:${PORT}
+ Environment: ${config.nodeEnv}
+ Database: ${config.database.name}
+ API Docs: http://localhost:${PORT}/swagger
+===============================
+            `);
         });
     } catch (error) {
-        console.error('❌ Failed to start server:', error.message);
+        console.error('Failed to start server:', error.message);
         process.exit(1);
     }
 };
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-    // Application specific logging, throwing an error, or other logic here
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-    console.error('❌ Uncaught Exception:', error);
+    console.error('Uncaught Exception:', error);
     process.exit(1);
 });
 

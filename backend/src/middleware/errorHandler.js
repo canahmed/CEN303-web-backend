@@ -54,14 +54,17 @@ const errorHandler = (err, req, res, next) => {
     const status = error.status || 'error';
 
     // Send response
-    res.status(statusCode).json({
-        success: false,
-        error: {
-            code: statusCode === 500 ? 'INTERNAL_ERROR' : err.code || 'ERROR',
-            message,
-            ...(config.nodeEnv === 'development' && { stack: err.stack })
-        }
-    });
+    res
+        .status(statusCode)
+        .type('application/json; charset=utf-8')
+        .json({
+            success: false,
+            error: {
+                code: statusCode === 500 ? 'INTERNAL_ERROR' : err.code || 'ERROR',
+                message,
+                ...(config.nodeEnv === 'development' && { stack: err.stack })
+            }
+        });
 };
 
 /**
