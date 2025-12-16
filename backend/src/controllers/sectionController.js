@@ -2,6 +2,36 @@ const { CourseSection, Course, User, Classroom } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { Op } = require('sequelize');
 
+const validateSchedule = (schedule = []) => {
+    const byDay = {};
+    for (const item of schedule) {
+        if (!item?.day || !item?.start_time || !item?.end_time) {
+            throw ApiError.badRequest('Program satırları eksik');
+        }
+        const [startH, startM] = item.start_time.split(':').map(Number);
+        const [endH, endM] = item.end_time.split(':').map(Number);
+        const startMinutes = startH * 60 + startM;
+        const endMinutes = endH * 60 + endM;
+
+        if (Number.isNaN(startMinutes) || Number.isNaN(endMinutes)) {
+            throw ApiError.badRequest('Program saat formatı geçersiz');
+        }
+        if (startMinutes >= endMinutes) {
+            throw ApiError.badRequest('Programda bitiş saati başlangıçtan sonra olmalı');
+        }
+
+        byDay[item.day] = byDay[item.day] || [];
+        for (const existing of byDay[item.day]) {
+            const { start, end } = existing;
+            const overlaps = startMinutes < end && endMinutes > start;
+            if (overlaps) {
+                throw ApiError.badRequest('Aynı gün için çakışan saatler var');
+            }
+        }
+        byDay[item.day].push({ start: startMinutes, end: endMinutes });
+    }
+};
+
 /**
  * Get all sections with filtering
  */
@@ -129,6 +159,8 @@ const createSection = async (req, res, next) => {
             throw ApiError.notFound('Ders bulunamadı');
         }
 
+        validateSchedule(schedule_json || []);
+
         // Check for duplicate section
         const existing = await CourseSection.findOne({
             where: { course_id, section_number, semester, year }
@@ -145,6 +177,14 @@ const createSection = async (req, res, next) => {
             throw ApiError.badRequest('Geçersiz eğitmen');
         }
 
+        let classroom = null;
+        if (classroom_id) {
+            classroom = await Classroom.findByPk(classroom_id);
+            if (!classroom) {
+                throw ApiError.badRequest('Geçersiz sınıf');
+            }
+        }
+
         const section = await CourseSection.create({
             course_id,
             section_number,
@@ -152,7 +192,7 @@ const createSection = async (req, res, next) => {
             year,
             instructor_id,
             capacity: capacity || 30,
-            classroom_id,
+            classroom_id: classroom ? classroom.id : null,
             schedule_json: schedule_json || []
         });
 
@@ -197,6 +237,23 @@ const updateSection = async (req, res, next) => {
             }
         }
 
+        let classroom = section.classroom_id;
+        if (classroom_id !== undefined) {
+            if (classroom_id) {
+                const foundClassroom = await Classroom.findByPk(classroom_id);
+                if (!foundClassroom) {
+                    throw ApiError.badRequest('Geçersiz sınıf');
+                }
+                classroom = foundClassroom.id;
+            } else {
+                classroom = null;
+            }
+        }
+
+        if (schedule_json !== undefined) {
+            validateSchedule(schedule_json);
+        }
+
         // Validate capacity
         if (capacity && capacity < section.enrolled_count) {
             throw ApiError.badRequest('Kapasite mevcut öğrenci sayısından az olamaz');
@@ -205,7 +262,7 @@ const updateSection = async (req, res, next) => {
         await section.update({
             instructor_id: instructor_id || section.instructor_id,
             capacity: capacity || section.capacity,
-            classroom_id: classroom_id !== undefined ? classroom_id : section.classroom_id,
+            classroom_id: classroom,
             schedule_json: schedule_json !== undefined ? schedule_json : section.schedule_json
         });
 

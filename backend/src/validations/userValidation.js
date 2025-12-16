@@ -59,11 +59,11 @@ const userListQuerySchema = Joi.object({
     limit: Joi.number()
         .integer()
         .min(1)
-        .max(100)
+        .max(200)
         .default(10)
         .messages({
             'number.min': 'Limit en az 1 olmalıdır',
-            'number.max': 'Limit en fazla 100 olabilir'
+            'number.max': 'Limit en fazla 200 olabilir'
         }),
     role: Joi.string()
         .valid('student', 'faculty', 'admin')

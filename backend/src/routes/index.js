@@ -13,6 +13,7 @@ const enrollmentRoutes = require('./enrollmentRoutes');
 const gradeRoutes = require('./gradeRoutes');
 const attendanceRoutes = require('./attendanceRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
+const classroomRoutes = require('./classroomRoutes');
 
 // Health check endpoint
 router.get('/health', (req, res) => {
@@ -35,5 +36,6 @@ router.use('/enrollments', enrollmentRoutes);
 router.use('/grades', gradeRoutes);
 router.use('/attendance', attendanceRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/classrooms', classroomRoutes);
 
 module.exports = router;

@@ -4,7 +4,7 @@ const enrollmentController = require('../controllers/enrollmentController');
 const { authenticate } = require('../middleware/auth');
 const { isFaculty } = require('../middleware/authorize');
 const { validateBody, validateQuery } = require('../middleware/validate');
-const { enrollSchema, enrollmentQuerySchema } = require('../validations/enrollmentValidation');
+const { enrollSchema, enrollmentQuerySchema, manageSectionStudentSchema } = require('../validations/enrollmentValidation');
 
 /**
  * @route POST /api/v1/enrollments
@@ -57,6 +57,29 @@ router.get('/students/:sectionId',
     authenticate,
     isFaculty,
     enrollmentController.getSectionStudents
+);
+
+/**
+ * @route POST /api/v1/enrollments/sections/:sectionId/students
+ * @desc Add a student to a section
+ * @access Faculty/Admin
+ */
+router.post('/sections/:sectionId/students',
+    authenticate,
+    isFaculty,
+    validateBody(manageSectionStudentSchema),
+    enrollmentController.addStudentToSection
+);
+
+/**
+ * @route DELETE /api/v1/enrollments/sections/:sectionId/students/:studentId
+ * @desc Remove a student from a section
+ * @access Faculty/Admin
+ */
+router.delete('/sections/:sectionId/students/:studentId',
+    authenticate,
+    isFaculty,
+    enrollmentController.removeStudentFromSection
 );
 
 module.exports = router;

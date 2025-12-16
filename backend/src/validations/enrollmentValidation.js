@@ -2,8 +2,8 @@ const Joi = require('joi');
 
 // Enrollment schemas
 const enrollSchema = Joi.object({
-    section_id: Joi.number().integer().required()
-        .messages({ 'number.base': 'Section ID gerekli' })
+    section_id: Joi.alternatives().try(Joi.string().guid(), Joi.number().integer()).required()
+        .messages({ 'alternatives.match': 'Section ID geçersiz' })
 });
 
 const enrollmentQuerySchema = Joi.object({
@@ -12,7 +12,13 @@ const enrollmentQuerySchema = Joi.object({
     status: Joi.string().valid('enrolled', 'dropped', 'completed', 'failed', 'withdrawn')
 });
 
+const manageSectionStudentSchema = Joi.object({
+    student_id: Joi.string().guid().required()
+        .messages({ 'string.guid': 'Öğrenci ID geçersiz' })
+});
+
 module.exports = {
     enrollSchema,
-    enrollmentQuerySchema
+    enrollmentQuerySchema,
+    manageSectionStudentSchema
 };

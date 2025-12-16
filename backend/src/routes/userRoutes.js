@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const { authenticate } = require('../middleware/auth');
-const { isAdmin } = require('../middleware/authorize');
+const { isAdmin, isFacultyOrAdmin } = require('../middleware/authorize');
 const { validateBody, validateQuery } = require('../middleware/validate');
 const { uploadProfilePicture } = require('../middleware/upload');
 const {
@@ -66,7 +66,7 @@ router.put(
 router.get(
     '/',
     authenticate,
-    isAdmin,
+    isFacultyOrAdmin,
     validateQuery(userListQuerySchema),
     userController.getUserList
 );
