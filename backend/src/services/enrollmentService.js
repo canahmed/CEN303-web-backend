@@ -12,8 +12,8 @@ class EnrollmentService {
 
     /**
      * Enroll a student in a course section
-     * @param {number} studentId - Student ID
-     * @param {number} sectionId - Section ID
+     * @param {string} studentId - Student ID
+     * @param {string} sectionId - Section ID
      * @returns {Promise<Enrollment>} - Created enrollment
      */
     static async enrollStudent(studentId, sectionId) {
@@ -21,23 +21,23 @@ class EnrollmentService {
 
         try {
             // 1. Get section details
-            const section = await CourseSection.findByPk(sectionId, {
-                include: [{ model: Course, as: 'course' }],
-                transaction
-            });
+        const section = await CourseSection.findByPk(String(sectionId), {
+            include: [{ model: Course, as: 'course' }],
+            transaction
+        });
 
             if (!section) {
                 throw ApiError.notFound('Section bulunamadı');
             }
 
             // 2. Check if already enrolled
-            const existingEnrollment = await Enrollment.findOne({
-                where: {
-                    student_id: studentId,
-                    section_id: sectionId
-                },
-                transaction
-            });
+        const existingEnrollment = await Enrollment.findOne({
+            where: {
+                student_id: studentId,
+                section_id: String(sectionId)
+            },
+            transaction
+        });
 
             if (existingEnrollment) {
                 if (existingEnrollment.status === 'enrolled') {
@@ -77,7 +77,7 @@ class EnrollmentService {
                 { enrolled_count: sequelize.literal('enrolled_count + 1') },
                 {
                     where: {
-                        id: sectionId,
+                        id: String(sectionId),
                         enrolled_count: { [require('sequelize').Op.lt]: sequelize.col('capacity') }
                     },
                     transaction
@@ -91,7 +91,7 @@ class EnrollmentService {
             // 6. Create enrollment
             const enrollment = await Enrollment.create({
                 student_id: studentId,
-                section_id: sectionId,
+                section_id: String(sectionId),
                 status: 'enrolled',
                 enrollment_date: new Date()
             }, { transaction });
@@ -125,7 +125,7 @@ class EnrollmentService {
         try {
             const enrollment = await Enrollment.findOne({
                 where: {
-                    id: enrollmentId,
+                    id: String(enrollmentId),
                     student_id: studentId
                 },
                 include: [{
@@ -161,7 +161,7 @@ class EnrollmentService {
             await CourseSection.update(
                 { enrolled_count: sequelize.literal('enrolled_count - 1') },
                 {
-                    where: { id: enrollment.section_id },
+                    where: { id: String(enrollment.section_id) },
                     transaction
                 }
             );
@@ -213,9 +213,10 @@ class EnrollmentService {
      * @returns {Promise<Array>} - List of enrollments with student info
      */
     static async getSectionStudents(sectionId) {
+        const sectionKey = String(sectionId);
         return Enrollment.findAll({
             where: {
-                section_id: sectionId,
+                section_id: sectionKey,
                 status: { [require('sequelize').Op.in]: ['enrolled', 'completed'] }
             },
             include: [{
