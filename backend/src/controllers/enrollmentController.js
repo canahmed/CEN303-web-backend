@@ -1,7 +1,9 @@
-const { Student } = require('../models');
+const { Student, Enrollment, CourseSection } = require('../models');
 const EnrollmentService = require('../services/enrollmentService');
 const ScheduleConflictService = require('../services/scheduleConflictService');
 const ApiError = require('../utils/ApiError');
+const { sequelize } = require('../models');
+const { Op, Sequelize } = require('sequelize');
 
 /**
  * Enroll in a course section
@@ -42,7 +44,7 @@ const dropCourse = async (req, res, next) => {
             throw ApiError.forbidden('Sadece öğrenciler ders bırakabilir');
         }
 
-        const enrollment = await EnrollmentService.dropCourse(parseInt(id), student.id);
+        const enrollment = await EnrollmentService.dropCourse(id, student.id);
 
         res.json({
             success: true,
@@ -87,15 +89,99 @@ const getMyCourses = async (req, res, next) => {
  */
 const getSectionStudents = async (req, res, next) => {
     try {
-        const { sectionId } = req.params;
+        const sectionKey = String(req.params.sectionId || '').trim();
 
-        const students = await EnrollmentService.getSectionStudents(parseInt(sectionId));
+        // Basic UUID guard to avoid DB errors
+        if (!sectionKey || !Sequelize.Validator.isUUID(sectionKey)) {
+            throw ApiError.badRequest('Geçersiz şube ID');
+        }
+
+        const students = await EnrollmentService.getSectionStudents(sectionKey);
 
         res.json({
             success: true,
-            data: students
+            data: students.map((enrollment) => ({
+                enrollmentId: enrollment.id,
+                studentId: enrollment.student_id,
+                studentNumber: enrollment.student?.student_number,
+                name: `${enrollment.student?.user?.first_name || ''} ${enrollment.student?.user?.last_name || ''}`.trim(),
+                email: enrollment.student?.user?.email,
+                status: enrollment.status,
+            }))
         });
     } catch (error) {
+        if (error?.message?.includes('uuid') && error?.message?.includes('integer')) {
+            return next(ApiError.badRequest('Geçersiz şube ID'));
+        }
+        next(error);
+    }
+};
+
+/**
+ * Add a student to a section (Faculty/Admin)
+ */
+const addStudentToSection = async (req, res, next) => {
+    try {
+        const { sectionId } = req.params;
+        const { student_id } = req.body;
+
+        const student = await Student.findByPk(student_id);
+        if (!student) {
+            throw ApiError.notFound('Öğrenci bulunamadı');
+        }
+
+        const enrollment = await EnrollmentService.enrollStudent(student.id, sectionId);
+
+        res.status(201).json({
+            success: true,
+            message: 'Öğrenci şubeye eklendi',
+            data: {
+                enrollmentId: enrollment.id,
+                studentId: enrollment.student_id,
+                studentNumber: student.student_number,
+                name: `${student.first_name || ''} ${student.last_name || ''}`.trim(),
+                email: student.user?.email,
+                status: enrollment.status,
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Remove a student from a section (Faculty/Admin)
+ */
+const removeStudentFromSection = async (req, res, next) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const { sectionId, studentId } = req.params;
+
+        const enrollment = await Enrollment.findOne({
+            where: { section_id: sectionId, student_id: studentId },
+            transaction
+        });
+
+        if (!enrollment) {
+            throw ApiError.notFound('Kayıt bulunamadı');
+        }
+
+        if (enrollment.status === 'enrolled') {
+            await CourseSection.update(
+                { enrolled_count: sequelize.literal('enrolled_count - 1') },
+                { where: { id: sectionId }, transaction }
+            );
+        }
+
+        await enrollment.destroy({ transaction });
+        await transaction.commit();
+
+        res.json({
+            success: true,
+            message: 'Öğrenci şubeden çıkarıldı'
+        });
+    } catch (error) {
+        await transaction.rollback();
         next(error);
     }
 };
@@ -133,5 +219,7 @@ module.exports = {
     dropCourse,
     getMyCourses,
     getSectionStudents,
-    getMySchedule
+    getMySchedule,
+    addStudentToSection,
+    removeStudentFromSection
 };
