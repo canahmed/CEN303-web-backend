@@ -182,7 +182,7 @@ const checkIn = async (req, res, next) => {
         }
 
         const record = await AttendanceService.checkIn(
-            parseInt(id),
+            id,
             student.id,
             { latitude, longitude, accuracy },
             qr_code
