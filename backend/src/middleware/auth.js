@@ -52,6 +52,24 @@ const authenticate = async (req, res, next) => {
 };
 
 /**
+ * Authorization middleware - checks user roles
+ * @param  {...string} allowedRoles - Roles that are allowed to access the route
+ */
+const authorize = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            return next(ApiError.unauthorized('Giriş yapmanız gerekli'));
+        }
+
+        if (!allowedRoles.includes(req.user.role)) {
+            return next(ApiError.forbidden('Bu işlem için yetkiniz yok'));
+        }
+
+        next();
+    };
+};
+
+/**
  * Optional authentication - continues even if no token
  * Useful for routes that have different behavior for authenticated users
  */
@@ -83,5 +101,7 @@ const optionalAuth = async (req, res, next) => {
 
 module.exports = {
     authenticate,
+    authorize,
     optionalAuth
 };
+
