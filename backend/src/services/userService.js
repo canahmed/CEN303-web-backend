@@ -223,11 +223,35 @@ const getUserById = async (userId) => {
     return user.toJSON();
 };
 
+/**
+ * Delete user (admin only)
+ */
+const deleteUser = async (userId) => {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+        throw ApiError.notFound('Kullanıcı bulunamadı');
+    }
+
+    // Delete related records first (cascade)
+    if (user.role === 'student') {
+        await Student.destroy({ where: { user_id: userId } });
+    } else if (user.role === 'faculty') {
+        await Faculty.destroy({ where: { user_id: userId } });
+    }
+
+    // Delete the user
+    await user.destroy();
+
+    return { message: 'Kullanıcı silindi' };
+};
+
 module.exports = {
     getProfile,
     updateProfile,
     updateProfilePicture,
     changePassword,
     getUserList,
-    getUserById
+    getUserById,
+    deleteUser
 };

@@ -113,11 +113,42 @@ const getUserById = async (req, res, next) => {
     }
 };
 
+/**
+ * @desc    Delete user (admin only)
+ * @route   DELETE /api/v1/users/:id
+ * @access  Private/Admin
+ */
+const deleteUser = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+
+        // Prevent self-deletion
+        if (userId === req.user.id) {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'SELF_DELETE',
+                    message: 'Kendinizi silemezsiniz'
+                }
+            });
+        }
+
+        await userService.deleteUser(userId);
+        res.status(200).json({
+            success: true,
+            message: 'Kullanıcı başarıyla silindi'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getProfile,
     updateProfile,
     uploadProfilePicture,
     changePassword,
     getUserList,
-    getUserById
+    getUserById,
+    deleteUser
 };

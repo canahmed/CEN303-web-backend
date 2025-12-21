@@ -83,4 +83,17 @@ router.get(
     userController.getUserById
 );
 
+/**
+ * @route   DELETE /api/v1/users/:id
+ * @desc    Delete user (admin only)
+ * @access  Private/Admin
+ */
+router.delete(
+    '/:id',
+    authenticate,
+    isAdmin,
+    userController.deleteUser
+);
+
 module.exports = router;
+
