@@ -9,6 +9,7 @@ const {
 } = require('../models');
 const { Op } = require('sequelize');
 const ApiError = require('../utils/ApiError');
+const CSPScheduler = require('./cspScheduler');
 
 // Day name mapping
 const DAY_NAMES = {
@@ -20,6 +21,96 @@ const DAY_NAMES = {
 };
 
 class ScheduleService {
+    /**
+     * Generate schedule using CSP algorithm (admin only)
+     */
+    static async generateSchedule(semester, year) {
+        // Get all sections for the semester
+        const sections = await CourseSection.findAll({
+            where: {
+                semester: semester || 'Güz',
+                year: year || new Date().getFullYear()
+            },
+            include: [
+                { model: Course, as: 'course' },
+                { model: User, as: 'instructor', attributes: ['id', 'first_name', 'last_name'] }
+            ]
+        });
+
+        if (sections.length === 0) {
+            throw ApiError.badRequest('Programlanacak ders şubesi bulunamadı');
+        }
+
+        // Get all available classrooms
+        const classrooms = await Classroom.findAll({
+            where: { is_active: true },
+            order: [['capacity', 'DESC']]
+        });
+
+        if (classrooms.length === 0) {
+            throw ApiError.badRequest('Kullanılabilir derslik bulunamadı');
+        }
+
+        // Initialize CSP Scheduler
+        const scheduler = new CSPScheduler();
+
+        // Generate schedule
+        const result = await scheduler.generate(sections, classrooms);
+
+        // Save to database if successful
+        if (result.success && result.schedule.length > 0) {
+            // Clear existing schedules for these sections
+            const sectionIds = sections.map(s => s.id);
+            await Schedule.destroy({
+                where: { section_id: { [Op.in]: sectionIds } }
+            });
+
+            // Save new schedules
+            const savedSchedules = await scheduler.saveToDatabase(result.schedule);
+            result.saved_count = savedSchedules.length;
+        }
+
+        return result;
+    }
+
+    /**
+     * Get schedule by ID
+     */
+    static async getScheduleById(scheduleId) {
+        const schedule = await Schedule.findByPk(scheduleId, {
+            include: [
+                {
+                    model: CourseSection,
+                    as: 'section',
+                    include: [
+                        { model: Course, as: 'course' },
+                        { model: User, as: 'instructor', attributes: ['id', 'first_name', 'last_name'] }
+                    ]
+                },
+                { model: Classroom, as: 'classroom' }
+            ]
+        });
+
+        if (!schedule) {
+            throw ApiError.notFound('Program bulunamadı');
+        }
+
+        return {
+            id: schedule.id,
+            day_of_week: schedule.day_of_week,
+            day_name: DAY_NAMES[schedule.day_of_week],
+            start_time: schedule.start_time,
+            end_time: schedule.end_time,
+            course_code: schedule.section?.course?.code,
+            course_name: schedule.section?.course?.name,
+            section_number: schedule.section?.section_number,
+            instructor: schedule.section?.instructor ?
+                `${schedule.section.instructor.first_name} ${schedule.section.instructor.last_name}` : null,
+            classroom: schedule.classroom?.room_number,
+            building: schedule.classroom?.building
+        };
+    }
+
     /**
      * Get weekly schedule for a user (student or faculty)
      */
@@ -150,7 +241,7 @@ class ScheduleService {
     static getNextDayOfWeek(date, dayOfWeek) {
         const result = new Date(date);
         const currentDay = result.getDay();
-        const targetDay = dayOfWeek === 7 ? 0 : dayOfWeek; // Convert to JS day format
+        const targetDay = dayOfWeek === 7 ? 0 : dayOfWeek;
         const diff = (targetDay - currentDay + 7) % 7;
         result.setDate(result.getDate() + diff);
         return result;

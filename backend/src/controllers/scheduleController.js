@@ -6,6 +6,37 @@ const ApiError = require('../utils/ApiError');
 // ==========================================
 
 /**
+ * POST /api/v1/scheduling/generate
+ * Generate schedule using CSP algorithm (admin only)
+ */
+const generateSchedule = async (req, res, next) => {
+    try {
+        const { semester, year } = req.body;
+        const result = await ScheduleService.generateSchedule(semester, year);
+        res.json({
+            success: true,
+            message: 'Program oluşturuldu',
+            data: result
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * GET /api/v1/scheduling/:scheduleId
+ * Get schedule by ID
+ */
+const getScheduleById = async (req, res, next) => {
+    try {
+        const schedule = await ScheduleService.getScheduleById(req.params.scheduleId);
+        res.json({ success: true, data: schedule });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * GET /api/v1/scheduling/my-schedule
  * Get my weekly schedule
  */
@@ -36,6 +67,7 @@ const getMyScheduleICal = async (req, res, next) => {
 // ==========================================
 // Reservation Controllers
 // ==========================================
+
 
 /**
  * POST /api/v1/reservations
@@ -139,6 +171,8 @@ const cancelReservation = async (req, res, next) => {
 };
 
 module.exports = {
+    generateSchedule,
+    getScheduleById,
     getMySchedule,
     getMyScheduleICal,
     createReservation,
@@ -148,3 +182,4 @@ module.exports = {
     rejectReservation,
     cancelReservation
 };
+
