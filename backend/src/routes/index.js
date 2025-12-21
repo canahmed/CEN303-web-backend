@@ -15,6 +15,13 @@ const attendanceRoutes = require('./attendanceRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
 const classroomRoutes = require('./classroomRoutes');
 
+// Part 3 Routes
+const mealRoutes = require('./mealRoutes');
+const walletRoutes = require('./walletRoutes');
+const eventRoutes = require('./eventRoutes');
+const schedulingRoutes = require('./schedulingRoutes');
+const reservationRoutes = require('./reservationRoutes');
+
 // Health check endpoint
 router.get('/health', (req, res) => {
     res.status(200).json({
@@ -38,4 +45,12 @@ router.use('/attendance', attendanceRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/classrooms', classroomRoutes);
 
+// Mount Part 3 routes
+router.use('/meals', mealRoutes);
+router.use('/wallet', walletRoutes);
+router.use('/events', eventRoutes);
+router.use('/scheduling', schedulingRoutes);
+router.use('/reservations', reservationRoutes);
+
 module.exports = router;
+

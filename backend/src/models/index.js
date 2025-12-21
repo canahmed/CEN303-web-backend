@@ -16,6 +16,17 @@ const AttendanceSession = require('./AttendanceSession');
 const AttendanceRecord = require('./AttendanceRecord');
 const ExcuseRequest = require('./ExcuseRequest');
 
+// Part 3 Models
+const Cafeteria = require('./Cafeteria')(sequelize);
+const MealMenu = require('./MealMenu')(sequelize);
+const MealReservation = require('./MealReservation')(sequelize);
+const Wallet = require('./Wallet')(sequelize);
+const Transaction = require('./Transaction')(sequelize);
+const Event = require('./Event')(sequelize);
+const EventRegistration = require('./EventRegistration')(sequelize);
+const Schedule = require('./Schedule')(sequelize);
+const ClassroomReservation = require('./ClassroomReservation')(sequelize);
+
 // ==========================================
 // Part 1 Associations
 // ==========================================
@@ -228,6 +239,150 @@ ExcuseRequest.belongsTo(User, {
 });
 
 // ==========================================
+// Part 3 Associations
+// ==========================================
+
+// Cafeteria - MealMenu (One-to-Many)
+Cafeteria.hasMany(MealMenu, {
+    foreignKey: 'cafeteria_id',
+    as: 'menus'
+});
+MealMenu.belongsTo(Cafeteria, {
+    foreignKey: 'cafeteria_id',
+    as: 'cafeteria'
+});
+
+// MealMenu - MealReservation (One-to-Many)
+MealMenu.hasMany(MealReservation, {
+    foreignKey: 'menu_id',
+    as: 'reservations'
+});
+MealReservation.belongsTo(MealMenu, {
+    foreignKey: 'menu_id',
+    as: 'menu'
+});
+
+// Cafeteria - MealReservation (One-to-Many)
+Cafeteria.hasMany(MealReservation, {
+    foreignKey: 'cafeteria_id',
+    as: 'reservations'
+});
+MealReservation.belongsTo(Cafeteria, {
+    foreignKey: 'cafeteria_id',
+    as: 'cafeteria'
+});
+
+// User - MealReservation (One-to-Many)
+User.hasMany(MealReservation, {
+    foreignKey: 'user_id',
+    as: 'mealReservations'
+});
+MealReservation.belongsTo(User, {
+    foreignKey: 'user_id',
+    as: 'user'
+});
+
+// User - Wallet (One-to-One)
+User.hasOne(Wallet, {
+    foreignKey: 'user_id',
+    as: 'wallet'
+});
+Wallet.belongsTo(User, {
+    foreignKey: 'user_id',
+    as: 'user'
+});
+
+// Wallet - Transaction (One-to-Many)
+Wallet.hasMany(Transaction, {
+    foreignKey: 'wallet_id',
+    as: 'transactions'
+});
+Transaction.belongsTo(Wallet, {
+    foreignKey: 'wallet_id',
+    as: 'wallet'
+});
+
+// User - Event (Organizer) (One-to-Many)
+User.hasMany(Event, {
+    foreignKey: 'organizer_id',
+    as: 'organizedEvents'
+});
+Event.belongsTo(User, {
+    foreignKey: 'organizer_id',
+    as: 'organizer'
+});
+
+// Event - EventRegistration (One-to-Many)
+Event.hasMany(EventRegistration, {
+    foreignKey: 'event_id',
+    as: 'registrations'
+});
+EventRegistration.belongsTo(Event, {
+    foreignKey: 'event_id',
+    as: 'event'
+});
+
+// User - EventRegistration (One-to-Many)
+User.hasMany(EventRegistration, {
+    foreignKey: 'user_id',
+    as: 'eventRegistrations'
+});
+EventRegistration.belongsTo(User, {
+    foreignKey: 'user_id',
+    as: 'user'
+});
+
+// CourseSection - Schedule (One-to-Many)
+CourseSection.hasMany(Schedule, {
+    foreignKey: 'section_id',
+    as: 'schedules'
+});
+Schedule.belongsTo(CourseSection, {
+    foreignKey: 'section_id',
+    as: 'section'
+});
+
+// Classroom - Schedule (One-to-Many)
+Classroom.hasMany(Schedule, {
+    foreignKey: 'classroom_id',
+    as: 'schedules'
+});
+Schedule.belongsTo(Classroom, {
+    foreignKey: 'classroom_id',
+    as: 'classroom'
+});
+
+// Classroom - ClassroomReservation (One-to-Many)
+Classroom.hasMany(ClassroomReservation, {
+    foreignKey: 'classroom_id',
+    as: 'reservations'
+});
+ClassroomReservation.belongsTo(Classroom, {
+    foreignKey: 'classroom_id',
+    as: 'classroom'
+});
+
+// User - ClassroomReservation (One-to-Many) - Requester
+User.hasMany(ClassroomReservation, {
+    foreignKey: 'user_id',
+    as: 'classroomReservations'
+});
+ClassroomReservation.belongsTo(User, {
+    foreignKey: 'user_id',
+    as: 'user'
+});
+
+// User - ClassroomReservation (One-to-Many) - Approver
+User.hasMany(ClassroomReservation, {
+    foreignKey: 'approved_by',
+    as: 'approvedReservations'
+});
+ClassroomReservation.belongsTo(User, {
+    foreignKey: 'approved_by',
+    as: 'approver'
+});
+
+// ==========================================
 // Database Sync
 // ==========================================
 
@@ -258,5 +413,16 @@ module.exports = {
     Classroom,
     AttendanceSession,
     AttendanceRecord,
-    ExcuseRequest
+    ExcuseRequest,
+    // Part 3 Models
+    Cafeteria,
+    MealMenu,
+    MealReservation,
+    Wallet,
+    Transaction,
+    Event,
+    EventRegistration,
+    Schedule,
+    ClassroomReservation
 };
+

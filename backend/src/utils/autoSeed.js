@@ -282,6 +282,14 @@ const autoSeed = async () => {
         await section1.update({ enrolled_count: 2 });
         console.log('   ✅ Created sample enrollments');
 
+        // Seed Part 3 data
+        try {
+            const { seedPart3Data } = require('./seedPart3');
+            await seedPart3Data();
+        } catch (part3Error) {
+            console.warn('⚠️ Part 3 seed skipped:', part3Error.message);
+        }
+
         console.log('\n🎉 Auto-seed completed successfully!');
         return true;
     } catch (error) {
@@ -292,3 +300,4 @@ const autoSeed = async () => {
 };
 
 module.exports = { autoSeed };
+
