@@ -2,8 +2,8 @@ const Joi = require('joi');
 
 // Grade entry schema
 const gradeEntrySchema = Joi.object({
-    enrollment_id: Joi.number().integer().required()
-        .messages({ 'number.base': 'Enrollment ID gerekli' }),
+    enrollment_id: Joi.string().uuid().required()
+        .messages({ 'string.guid': 'Enrollment ID gerekli', 'any.required': 'Enrollment ID gerekli' }),
     midterm_grade: Joi.number().min(0).max(100).allow(null)
         .messages({
             'number.min': 'Not 0-100 arasında olmalı',
@@ -20,7 +20,7 @@ const gradeEntrySchema = Joi.object({
 const bulkGradeEntrySchema = Joi.object({
     grades: Joi.array().items(
         Joi.object({
-            enrollment_id: Joi.number().integer().required(),
+            enrollment_id: Joi.string().uuid().required(),
             midterm_grade: Joi.number().min(0).max(100).allow(null),
             final_grade: Joi.number().min(0).max(100).allow(null)
         })
