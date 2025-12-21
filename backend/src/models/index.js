@@ -118,6 +118,16 @@ Course.belongsToMany(Course, {
     otherKey: 'course_id'
 });
 
+// CoursePrerequisite direct associations (for prerequisiteService queries)
+CoursePrerequisite.belongsTo(Course, {
+    foreignKey: 'course_id',
+    as: 'course'
+});
+CoursePrerequisite.belongsTo(Course, {
+    foreignKey: 'prerequisite_course_id',
+    as: 'prerequisite'
+});
+
 // Student - CourseSection (Many-to-Many via Enrollment)
 Student.belongsToMany(CourseSection, {
     through: Enrollment,
