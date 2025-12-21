@@ -390,6 +390,79 @@ class AttendanceService {
             students: studentStats
         };
     }
+
+    /**
+     * Get active sessions for a student's enrolled courses
+     * @param {string} studentId - Student ID
+     * @returns {Promise<Array>} - List of active sessions
+     */
+    static async getActiveSessionsForStudent(studentId) {
+        // Get student's enrollments
+        const enrollments = await Enrollment.findAll({
+            where: {
+                student_id: studentId,
+                status: 'enrolled'
+            },
+            include: [{
+                model: CourseSection,
+                as: 'section',
+                include: [{ model: Course, as: 'course' }]
+            }]
+        });
+
+        const sectionIds = enrollments.map(e => e.section_id);
+
+        if (sectionIds.length === 0) {
+            return [];
+        }
+
+        // Get active sessions for those sections
+        const activeSessions = await AttendanceSession.findAll({
+            where: {
+                section_id: { [Op.in]: sectionIds },
+                status: 'active'
+            },
+            include: [{
+                model: CourseSection,
+                as: 'section',
+                include: [
+                    { model: Course, as: 'course' },
+                    { model: User, as: 'instructor', attributes: ['id', 'first_name', 'last_name'] }
+                ]
+            }],
+            order: [['created_at', 'DESC']]
+        });
+
+        // Check if student already checked in
+        const results = await Promise.all(activeSessions.map(async (session) => {
+            const existingRecord = await AttendanceRecord.findOne({
+                where: {
+                    session_id: session.id,
+                    student_id: studentId
+                }
+            });
+
+            return {
+                id: session.id,
+                course: {
+                    code: session.section?.course?.code,
+                    name: session.section?.course?.name
+                },
+                section_number: session.section?.section_number,
+                instructor: session.section?.instructor ?
+                    `${session.section.instructor.first_name} ${session.section.instructor.last_name}` : null,
+                date: session.date,
+                start_time: session.start_time,
+                qr_code: session.qr_code,
+                latitude: session.latitude,
+                longitude: session.longitude,
+                geofence_radius: session.geofence_radius,
+                already_checked_in: !!existingRecord
+            };
+        }));
+
+        return results;
+    }
 }
 
 module.exports = AttendanceService;

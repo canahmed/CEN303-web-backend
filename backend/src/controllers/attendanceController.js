@@ -105,7 +105,7 @@ const closeSession = async (req, res, next) => {
         const { id } = req.params;
         const userId = req.user.id;
 
-        const session = await AttendanceService.closeSession(parseInt(id), userId);
+        const session = await AttendanceService.closeSession(id, userId);
 
         res.json({
             success: true,
@@ -217,6 +217,29 @@ const getMyAttendance = async (req, res, next) => {
         res.json({
             success: true,
             data: attendance
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Get active sessions for enrolled courses (Student)
+ */
+const getMyActiveSessions = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+
+        const student = await Student.findOne({ where: { user_id: userId } });
+        if (!student) {
+            throw ApiError.forbidden('Sadece öğrenciler bu endpoint\'i kullanabilir');
+        }
+
+        const activeSessions = await AttendanceService.getActiveSessionsForStudent(student.id);
+
+        res.json({
+            success: true,
+            data: activeSessions
         });
     } catch (error) {
         next(error);
@@ -406,6 +429,7 @@ module.exports = {
     // Check-in
     checkIn,
     getMyAttendance,
+    getMyActiveSessions,
     // Excuses
     submitExcuse,
     getExcuseRequests,

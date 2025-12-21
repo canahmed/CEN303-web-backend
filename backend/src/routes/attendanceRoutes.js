@@ -111,6 +111,16 @@ router.get('/my-attendance',
 );
 
 /**
+ * @route GET /api/v1/attendance/my-active-sessions
+ * @desc Get active sessions for enrolled courses
+ * @access Student only
+ */
+router.get('/my-active-sessions',
+    authenticate,
+    attendanceController.getMyActiveSessions
+);
+
+/**
  * @route GET /api/v1/attendance/report/:sectionId
  * @desc Get section attendance report
  * @access Faculty only
