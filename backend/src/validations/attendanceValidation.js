@@ -23,8 +23,8 @@ const checkInSchema = Joi.object({
 
 // Excuse schema
 const excuseSchema = Joi.object({
-    session_id: Joi.number().integer().required()
-        .messages({ 'number.base': 'Session ID gerekli' }),
+    session_id: Joi.string().uuid().required()
+        .messages({ 'string.guid': 'Session ID gerekli', 'any.required': 'Session ID gerekli' }),
     reason: Joi.string().min(10).max(1000).required()
         .messages({
             'string.empty': 'Mazeret açıklaması gerekli',
