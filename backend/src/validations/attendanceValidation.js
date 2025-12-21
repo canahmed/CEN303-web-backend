@@ -2,8 +2,8 @@ const Joi = require('joi');
 
 // Create session schema
 const createSessionSchema = Joi.object({
-    section_id: Joi.number().integer().required()
-        .messages({ 'number.base': 'Section ID gerekli' }),
+    section_id: Joi.string().uuid().required()
+        .messages({ 'string.guid': 'Section ID gerekli', 'any.required': 'Section ID gerekli' }),
     geofence_radius: Joi.number().integer().min(5).max(100).default(15)
         .messages({ 'number.min': 'Geofence en az 5 metre olmalı' }),
     latitude: Joi.number().min(-90).max(90),
