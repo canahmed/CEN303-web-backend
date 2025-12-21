@@ -1,51 +1,11 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const config = require('../config');
 
-// Create transporter
-const createTransporter = () => {
-    // If no SMTP credentials, defer to Ethereal auto account (even if NODE_ENV=production in local)
-    if (!config.email.user || !config.email.password) {
-        return null; // Will create test account on first use
-    }
-
-    return nodemailer.createTransport({
-        host: config.email.host,
-        port: config.email.port,
-        secure: config.email.port === 465, // true for 465, false for other ports
-        auth: {
-            user: config.email.user,
-            pass: config.email.password
-        }
-    });
-};
-
-let transporter = createTransporter();
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
- * Get or create email transporter
- * Uses Ethereal for development if no email config is provided
- */
-const getTransporter = async () => {
-    if (transporter) return transporter;
-
-    // Create Ethereal test account for development
-    const testAccount = await nodemailer.createTestAccount();
-    transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-            user: testAccount.user,
-            pass: testAccount.pass
-        }
-    });
-
-    console.log('📧 Using Ethereal test email account:', testAccount.user);
-    return transporter;
-};
-
-/**
- * Send email
+ * Send email using Resend
  * @param {Object} options - Email options
  * @param {string} options.to - Recipient email
  * @param {string} options.subject - Email subject
@@ -53,24 +13,29 @@ const getTransporter = async () => {
  * @param {string} options.html - HTML body
  */
 const sendEmail = async ({ to, subject, text, html }) => {
-    const emailTransporter = await getTransporter();
+    // If no API key, log and skip
+    if (!process.env.RESEND_API_KEY) {
+        console.log('⚠️ RESEND_API_KEY not configured, skipping email');
+        console.log('📧 Email would be sent to:', to);
+        console.log('📧 Subject:', subject);
+        return { id: 'skipped' };
+    }
 
-    const mailOptions = {
-        from: config.email.from,
-        to,
+    const { data, error } = await resend.emails.send({
+        from: 'Smart Campus <onboarding@resend.dev>',
+        to: [to],
         subject,
         text,
         html
-    };
+    });
 
-    const info = await emailTransporter.sendMail(mailOptions);
-
-    // Log preview URL for Ethereal
-    if (config.nodeEnv === 'development') {
-        console.log('📧 Email preview URL:', nodemailer.getTestMessageUrl(info));
+    if (error) {
+        console.error('❌ Resend error:', error);
+        throw new Error(error.message);
     }
 
-    return info;
+    console.log('✅ Email sent successfully:', data.id);
+    return data;
 };
 
 /**
@@ -82,8 +47,8 @@ const sendEmail = async ({ to, subject, text, html }) => {
 const sendVerificationEmail = async (to, name, token) => {
     const verificationUrl = `${config.frontendUrl}/verify-email/${token}`;
 
-    // Log the verification link so it can be used in local/dev even if email fails
-    console.log('Email verification link:', verificationUrl);
+    // Log the verification link
+    console.log('📧 Email verification link:', verificationUrl);
 
     const subject = 'Smart Campus - Email Doğrulama';
     const text = `Merhaba ${name},\n\nEmail adresinizi doğrulamak için aşağıdaki linke tıklayın:\n${verificationUrl}\n\nBu link 24 saat geçerlidir.`;
