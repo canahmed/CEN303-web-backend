@@ -80,7 +80,19 @@ const getSession = async (req, res, next) => {
         const session = await AttendanceSession.findByPk(id, {
             include: [
                 { model: CourseSection, as: 'section', include: ['course'] },
-                { model: require('../models').AttendanceRecord, as: 'records', include: ['student'] }
+                {
+                    model: require('../models').AttendanceRecord,
+                    as: 'records',
+                    include: [{
+                        model: Student,
+                        as: 'student',
+                        include: [{
+                            model: require('../models').User,
+                            as: 'user',
+                            attributes: ['id', 'first_name', 'last_name', 'email']
+                        }]
+                    }]
+                }
             ]
         });
 
