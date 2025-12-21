@@ -83,17 +83,14 @@ const register = async (userData) => {
 
         await transaction.commit();
 
-        // Send verification email
-        try {
-            await sendVerificationEmail(
-                user.email,
-                `${user.first_name} ${user.last_name}`,
-                verificationToken
-            );
-        } catch (emailError) {
+        // Send verification email asynchronously (don't wait)
+        sendVerificationEmail(
+            user.email,
+            `${user.first_name} ${user.last_name}`,
+            verificationToken
+        ).catch(emailError => {
             console.error('Email gönderimi başarısız:', emailError.message);
-            // Don't throw, user is already created
-        }
+        });
 
         return {
             user: user.toJSON(),
