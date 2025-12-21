@@ -23,6 +23,13 @@ Bu API, üniversite kampüsünün günlük operasyonlarını dijitalleştiren ve
 - **Grades**: Not girişi, GPA/CGPA, transkript ve PDF
 - **Attendance**: GPS tabanlı yoklama, QR kod, mazeret yönetimi
 
+### Part 3 - Yemek Servisi, Etkinlik ve Çizelgeleme
+- **Meals**: Yemekhane menüleri, rezervasyon, QR ile kullanım
+- **Wallet**: Cüzdan bakiyesi, para yükleme, işlem geçmişi
+- **Events**: Kampüs etkinlikleri, kayıt, QR check-in
+- **Scheduling**: Ders programı, iCal export
+- **Reservations**: Derslik rezervasyonu, onay sistemi
+
 ### Kimlik Doğrulama
 API, JWT (JSON Web Token) tabanlı kimlik doğrulama kullanır:
 - **Access Token**: 15 dakika geçerli
@@ -81,6 +88,27 @@ API, JWT (JSON Web Token) tabanlı kimlik doğrulama kullanır:
             {
                 name: 'Attendance',
                 description: 'Yoklama sistemi (GPS tabanlı, QR kod, mazeret yönetimi)'
+            },
+            // Part 3 Tags
+            {
+                name: 'Meals',
+                description: 'Yemek servisi (menü listeleme, rezervasyon, QR ile kullanım)'
+            },
+            {
+                name: 'Wallet',
+                description: 'Cüzdan işlemleri (bakiye, para yükleme, işlem geçmişi)'
+            },
+            {
+                name: 'Events',
+                description: 'Etkinlik yönetimi (listeleme, kayıt olma, QR check-in)'
+            },
+            {
+                name: 'Scheduling',
+                description: 'Ders programı (haftalık program, iCal export)'
+            },
+            {
+                name: 'Reservations',
+                description: 'Derslik rezervasyonu (talep oluşturma, onay/red)'
             }
         ],
         components: {
