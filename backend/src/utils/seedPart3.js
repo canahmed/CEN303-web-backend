@@ -5,28 +5,51 @@ const { Cafeteria, MealMenu, Event } = require('../models');
  */
 const seedPart3Data = async () => {
     try {
-        console.log('🌱 Seeding Part 3 data...');
+        console.log('🌱 [Part3Seed] Starting Part 3 data seed...');
 
-        // Create Cafeterias
-        const [cafeteria1] = await Cafeteria.findOrCreate({
-            where: { name: 'Ana Yemekhane' },
-            defaults: {
-                location: 'Merkez Kampüs, A Blok',
-                capacity: 500,
-                is_active: true
-            }
-        });
+        // Check if Cafeteria model exists
+        if (!Cafeteria) {
+            console.error('❌ [Part3Seed] Cafeteria model not found!');
+            return;
+        }
+        console.log('✓ [Part3Seed] Cafeteria model loaded');
 
-        const [cafeteria2] = await Cafeteria.findOrCreate({
-            where: { name: 'Mühendislik Yemekhanesi' },
-            defaults: {
-                location: 'Mühendislik Fakültesi, B Blok',
-                capacity: 200,
-                is_active: true
-            }
-        });
+        // Check current cafeteria count
+        const existingCount = await Cafeteria.count();
+        console.log(`📊 [Part3Seed] Existing cafeterias: ${existingCount}`);
 
-        console.log('✅ Cafeterias seeded');
+        if (existingCount >= 2) {
+            console.log('✅ [Part3Seed] Cafeterias already exist, skipping...');
+        } else {
+            // Create Cafeterias
+            console.log('🔧 [Part3Seed] Creating cafeterias...');
+
+            const [cafeteria1, created1] = await Cafeteria.findOrCreate({
+                where: { name: 'Ana Yemekhane' },
+                defaults: {
+                    location: 'Merkez Kampüs, A Blok',
+                    capacity: 500,
+                    is_active: true
+                }
+            });
+            console.log(`   ✅ Ana Yemekhane: ${created1 ? 'created' : 'exists'} (id: ${cafeteria1.id})`);
+
+            const [cafeteria2, created2] = await Cafeteria.findOrCreate({
+                where: { name: 'Mühendislik Yemekhanesi' },
+                defaults: {
+                    location: 'Mühendislik Fakültesi, B Blok',
+                    capacity: 200,
+                    is_active: true
+                }
+            });
+            console.log(`   ✅ Mühendislik Yemekhanesi: ${created2 ? 'created' : 'exists'} (id: ${cafeteria2.id})`);
+
+            console.log('✅ [Part3Seed] Cafeterias seeded successfully');
+        }
+
+        // Check Events
+        const eventCount = await Event.count();
+        console.log(`📊 [Part3Seed] Existing events: ${eventCount}`);
 
         // Create sample menus for next 7 days
         const today = new Date();
