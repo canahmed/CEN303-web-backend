@@ -14,8 +14,17 @@ const autoSeed = async () => {
         // Check if users exist
         const userCount = await User.count();
 
+        // Always try to seed Part 3 data (cafeterias, menus, events)
+        // This ensures Part 3 data exists even if base data was seeded before Part 3
+        try {
+            const { seedPart3Data } = require('./seedPart3');
+            await seedPart3Data();
+        } catch (part3Error) {
+            console.warn('⚠️ Part 3 seed issue:', part3Error.message);
+        }
+
         if (userCount > 0) {
-            console.log('📊 Database already has data, skipping auto-seed');
+            console.log('📊 Database already has users, skipping base auto-seed');
             return false;
         }
 
@@ -282,13 +291,7 @@ const autoSeed = async () => {
         await section1.update({ enrolled_count: 2 });
         console.log('   ✅ Created sample enrollments');
 
-        // Seed Part 3 data
-        try {
-            const { seedPart3Data } = require('./seedPart3');
-            await seedPart3Data();
-        } catch (part3Error) {
-            console.warn('⚠️ Part 3 seed skipped:', part3Error.message);
-        }
+        // Part 3 data is already seeded at the start of autoSeed
 
         console.log('\n🎉 Auto-seed completed successfully!');
         return true;
