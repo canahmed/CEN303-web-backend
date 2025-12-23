@@ -147,8 +147,21 @@ const startServer = async () => {
         if (config.nodeEnv === 'development') {
             await syncDatabase({ alter: true });
         } else {
-            // Production'da da alter:true kullanarak yeni sütunları ekle
-            await syncDatabase({ alter: true });
+            // Production'da veri kaybını önlemek için alter:false kullan
+            await syncDatabase({ alter: false });
+
+            // Manuel olarak eksik sütunları ekle (varsa atla)
+            const { sequelize } = require('./models');
+            try {
+                await sequelize.query(`
+                    ALTER TABLE cafeterias 
+                    ADD COLUMN IF NOT EXISTS open_hours VARCHAR(100);
+                `);
+                console.log('✅ open_hours column ensured');
+            } catch (err) {
+                // Sütun zaten varsa hata vermez (IF NOT EXISTS)
+                console.log('ℹ️ open_hours column check:', err.message);
+            }
         }
 
         await autoSeed();
