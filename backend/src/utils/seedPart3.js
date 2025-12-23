@@ -1,11 +1,37 @@
-const { Cafeteria, MealMenu, Event } = require('../models');
+const { Cafeteria, MealMenu, Event, Classroom } = require('../models');
 
 /**
- * Seed Part 3 data: Cafeterias, Sample Menus, Sample Events
+ * Seed Part 3 data: Cafeterias, Sample Menus, Sample Events, Classrooms
  */
 const seedPart3Data = async () => {
     try {
         console.log('🌱 [Part3Seed] Starting Part 3 data seed...');
+
+        // Seed Classrooms first
+        if (Classroom) {
+            const classroomData = [
+                { building: 'A Blok', room_number: 'A-101', capacity: 40, has_projector: true, has_ac: true },
+                { building: 'A Blok', room_number: 'A-102', capacity: 35, has_projector: true, has_ac: true },
+                { building: 'A Blok', room_number: 'A-201', capacity: 50, has_projector: true, has_ac: true },
+                { building: 'B Blok', room_number: 'B-101', capacity: 60, has_projector: true, has_ac: false },
+                { building: 'B Blok', room_number: 'B-102', capacity: 45, has_projector: true, has_ac: true },
+                { building: 'B Blok', room_number: 'B-201', capacity: 80, has_projector: true, has_ac: true },
+                { building: 'C Blok', room_number: 'C-101', capacity: 30, has_projector: false, has_ac: true },
+                { building: 'C Blok', room_number: 'C-102', capacity: 25, has_projector: true, has_ac: false },
+                { building: 'Konferans', room_number: 'K-1', capacity: 200, has_projector: true, has_ac: true },
+                { building: 'Konferans', room_number: 'K-2', capacity: 100, has_projector: true, has_ac: true },
+            ];
+
+            for (const cr of classroomData) {
+                await Classroom.findOrCreate({
+                    where: { building: cr.building, room_number: cr.room_number },
+                    defaults: cr
+                });
+            }
+            console.log('✅ [Part3Seed] Classrooms seeded (10 rooms)');
+        } else {
+            console.log('⚠️ [Part3Seed] Classroom model not found, skipping...');
+        }
 
         // Check if Cafeteria model exists
         if (!Cafeteria) {
