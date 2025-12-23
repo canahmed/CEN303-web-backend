@@ -7,12 +7,11 @@ const { isAdmin } = require('../middleware/authorize');
 /**
  * @route GET /api/v1/classrooms
  * @desc  List classrooms for dropdowns
- * @access Admin
+ * @access Authenticated users
  */
 router.get(
     '/',
     authenticate,
-    isAdmin,
     classroomController.getClassrooms
 );
 
