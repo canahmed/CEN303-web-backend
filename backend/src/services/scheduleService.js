@@ -117,9 +117,20 @@ class ScheduleService {
         let scheduleData = [];
 
         if (userRole === 'student') {
+            // First find the student record for this user
+            const Student = require('../models').Student;
+            const student = await Student.findOne({ where: { user_id: userId } });
+
+            if (!student) {
+                return { schedule: [], count: 0 };
+            }
+
             // Get student's enrolled sections
             const enrollments = await Enrollment.findAll({
-                where: { status: { [Op.in]: ['enrolled', 'completed'] } },
+                where: {
+                    student_id: student.id,
+                    status: { [Op.in]: ['enrolled', 'completed'] }
+                },
                 include: [{
                     model: CourseSection,
                     as: 'section',
@@ -129,11 +140,6 @@ class ScheduleService {
                         { model: Classroom, as: 'classroom' },
                         { model: Schedule, as: 'schedules', include: [{ model: Classroom, as: 'classroom' }] }
                     ]
-                }],
-                include: [{
-                    model: require('../models').Student,
-                    as: 'student',
-                    where: { user_id: userId }
                 }]
             });
 
