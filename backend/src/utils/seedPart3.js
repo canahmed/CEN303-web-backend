@@ -14,40 +14,28 @@ const seedPart3Data = async () => {
         }
         console.log('✓ [Part3Seed] Cafeteria model loaded');
 
-        // Check current cafeteria count
-        const existingCount = await Cafeteria.count();
-        console.log(`📊 [Part3Seed] Existing cafeterias: ${existingCount}`);
+        // Get or create cafeterias
+        const [cafeteria1] = await Cafeteria.findOrCreate({
+            where: { name: 'Ana Yemekhane' },
+            defaults: {
+                location: 'Merkez Kampüs, A Blok',
+                open_hours: 'Öğle: 11:30-14:00, Akşam: 17:30-20:00',
+                capacity: 500,
+                is_active: true
+            }
+        });
+        console.log(`✅ [Part3Seed] Ana Yemekhane ready (id: ${cafeteria1.id})`);
 
-        if (existingCount >= 2) {
-            console.log('✅ [Part3Seed] Cafeterias already exist, skipping...');
-        } else {
-            // Create Cafeterias
-            console.log('🔧 [Part3Seed] Creating cafeterias...');
-
-            const [cafeteria1, created1] = await Cafeteria.findOrCreate({
-                where: { name: 'Ana Yemekhane' },
-                defaults: {
-                    location: 'Merkez Kampüs, A Blok',
-                    open_hours: 'Öğle: 11:30-14:00, Akşam: 17:30-20:00',
-                    capacity: 500,
-                    is_active: true
-                }
-            });
-            console.log(`   ✅ Ana Yemekhane: ${created1 ? 'created' : 'exists'} (id: ${cafeteria1.id})`);
-
-            const [cafeteria2, created2] = await Cafeteria.findOrCreate({
-                where: { name: 'Mühendislik Yemekhanesi' },
-                defaults: {
-                    location: 'Mühendislik Fakültesi, B Blok',
-                    open_hours: 'Öğle: 12:00-14:30, Akşam: 18:00-20:30',
-                    capacity: 200,
-                    is_active: true
-                }
-            });
-            console.log(`   ✅ Mühendislik Yemekhanesi: ${created2 ? 'created' : 'exists'} (id: ${cafeteria2.id})`);
-
-            console.log('✅ [Part3Seed] Cafeterias seeded successfully');
-        }
+        const [cafeteria2] = await Cafeteria.findOrCreate({
+            where: { name: 'Mühendislik Yemekhanesi' },
+            defaults: {
+                location: 'Mühendislik Fakültesi, B Blok',
+                open_hours: 'Öğle: 12:00-14:30, Akşam: 18:00-20:30',
+                capacity: 200,
+                is_active: true
+            }
+        });
+        console.log(`✅ [Part3Seed] Mühendislik Yemekhanesi ready (id: ${cafeteria2.id})`);
 
         // Check Events
         const eventCount = await Event.count();
