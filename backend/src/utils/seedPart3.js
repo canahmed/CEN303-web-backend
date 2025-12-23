@@ -10,16 +10,16 @@ const seedPart3Data = async () => {
         // Seed Classrooms first
         if (Classroom) {
             const classroomData = [
-                { building: 'A Blok', room_number: 'A-101', capacity: 40, has_projector: true, has_ac: true },
-                { building: 'A Blok', room_number: 'A-102', capacity: 35, has_projector: true, has_ac: true },
-                { building: 'A Blok', room_number: 'A-201', capacity: 50, has_projector: true, has_ac: true },
-                { building: 'B Blok', room_number: 'B-101', capacity: 60, has_projector: true, has_ac: false },
-                { building: 'B Blok', room_number: 'B-102', capacity: 45, has_projector: true, has_ac: true },
-                { building: 'B Blok', room_number: 'B-201', capacity: 80, has_projector: true, has_ac: true },
-                { building: 'C Blok', room_number: 'C-101', capacity: 30, has_projector: false, has_ac: true },
-                { building: 'C Blok', room_number: 'C-102', capacity: 25, has_projector: true, has_ac: false },
-                { building: 'Konferans', room_number: 'K-1', capacity: 200, has_projector: true, has_ac: true },
-                { building: 'Konferans', room_number: 'K-2', capacity: 100, has_projector: true, has_ac: true },
+                { building: 'A Blok', room_number: 'A-101', capacity: 40, features_json: ['projector', 'ac'] },
+                { building: 'A Blok', room_number: 'A-102', capacity: 35, features_json: ['projector', 'ac'] },
+                { building: 'A Blok', room_number: 'A-201', capacity: 50, features_json: ['projector', 'ac'] },
+                { building: 'B Blok', room_number: 'B-101', capacity: 60, features_json: ['projector'] },
+                { building: 'B Blok', room_number: 'B-102', capacity: 45, features_json: ['projector', 'ac'] },
+                { building: 'B Blok', room_number: 'B-201', capacity: 80, features_json: ['projector', 'ac'] },
+                { building: 'C Blok', room_number: 'C-101', capacity: 30, features_json: ['ac'] },
+                { building: 'C Blok', room_number: 'C-102', capacity: 25, features_json: ['projector'] },
+                { building: 'Konferans', room_number: 'K-1', capacity: 200, features_json: ['projector', 'ac', 'microphone'] },
+                { building: 'Konferans', room_number: 'K-2', capacity: 100, features_json: ['projector', 'ac'] },
             ];
 
             for (const cr of classroomData) {
