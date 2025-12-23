@@ -43,7 +43,6 @@ class ScheduleService {
 
         // Get all available classrooms
         const classrooms = await Classroom.findAll({
-            where: { is_active: true },
             order: [['capacity', 'DESC']]
         });
 
