@@ -263,9 +263,19 @@ class ScheduleService {
     static async createReservation(userId, data) {
         let { classroom_id, date, start_time, end_time, purpose } = data;
 
-        // Extract date from start_time if not provided
-        if (!date && start_time) {
-            date = new Date(start_time).toISOString().slice(0, 10);
+        // Extract date and time from ISO datetime strings
+        if (start_time && start_time.includes('T')) {
+            const startDate = new Date(start_time);
+            if (!date) {
+                date = startDate.toISOString().slice(0, 10);
+            }
+            // Extract time as HH:mm format
+            start_time = startDate.toTimeString().slice(0, 5);
+        }
+
+        if (end_time && end_time.includes('T')) {
+            const endDate = new Date(end_time);
+            end_time = endDate.toTimeString().slice(0, 5);
         }
 
         // Check if classroom exists
