@@ -28,6 +28,7 @@ const seedPart3Data = async () => {
                 where: { name: 'Ana Yemekhane' },
                 defaults: {
                     location: 'Merkez Kampüs, A Blok',
+                    open_hours: 'Öğle: 11:30-14:00, Akşam: 17:30-20:00',
                     capacity: 500,
                     is_active: true
                 }
@@ -38,6 +39,7 @@ const seedPart3Data = async () => {
                 where: { name: 'Mühendislik Yemekhanesi' },
                 defaults: {
                     location: 'Mühendislik Fakültesi, B Blok',
+                    open_hours: 'Öğle: 12:00-14:30, Akşam: 18:00-20:30',
                     capacity: 200,
                     is_active: true
                 }

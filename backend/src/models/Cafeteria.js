@@ -15,6 +15,11 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING(255),
             allowNull: true
         },
+        open_hours: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+            comment: 'Örn: Öğle: 11:30-14:00, Akşam: 17:30-20:00'
+        },
         capacity: {
             type: DataTypes.INTEGER,
             defaultValue: 100
