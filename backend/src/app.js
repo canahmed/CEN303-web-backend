@@ -157,9 +157,14 @@ const startServer = async () => {
                     ALTER TABLE cafeterias 
                     ADD COLUMN IF NOT EXISTS open_hours VARCHAR(100);
                 `);
-                console.log('✅ open_hours column ensured');
+                // NULL olan open_hours değerlerini güncelle
+                await sequelize.query(`
+                    UPDATE cafeterias 
+                    SET open_hours = '12:00-14:00 / 17:00-19:00' 
+                    WHERE open_hours IS NULL;
+                `);
+                console.log('✅ open_hours column ensured and defaults set');
             } catch (err) {
-                // Sütun zaten varsa hata vermez (IF NOT EXISTS)
                 console.log('ℹ️ open_hours column check:', err.message);
             }
         }
