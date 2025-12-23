@@ -147,7 +147,8 @@ const startServer = async () => {
         if (config.nodeEnv === 'development') {
             await syncDatabase({ alter: true });
         } else {
-            await syncDatabase({ alter: false });
+            // Production'da da alter:true kullanarak yeni sütunları ekle
+            await syncDatabase({ alter: true });
         }
 
         await autoSeed();
