@@ -261,7 +261,12 @@ class ScheduleService {
      * Create classroom reservation
      */
     static async createReservation(userId, data) {
-        const { classroom_id, date, start_time, end_time, purpose } = data;
+        let { classroom_id, date, start_time, end_time, purpose } = data;
+
+        // Extract date from start_time if not provided
+        if (!date && start_time) {
+            date = new Date(start_time).toISOString().slice(0, 10);
+        }
 
         // Check if classroom exists
         const classroom = await Classroom.findByPk(classroom_id);
