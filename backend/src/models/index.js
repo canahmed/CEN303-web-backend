@@ -28,8 +28,8 @@ const Schedule = require('./Schedule')(sequelize);
 const ClassroomReservation = require('./ClassroomReservation')(sequelize);
 
 // Part 4 Models
-const Notification = require('./Notification');
-const NotificationPreferences = require('./NotificationPreferences');
+const Notification = require('./Notification')(sequelize);
+const NotificationPreferences = require('./NotificationPreferences')(sequelize);
 
 // ==========================================
 // Part 1 Associations
