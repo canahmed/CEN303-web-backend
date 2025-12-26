@@ -22,6 +22,10 @@ const eventRoutes = require('./eventRoutes');
 const schedulingRoutes = require('./schedulingRoutes');
 const reservationRoutes = require('./reservationRoutes');
 
+// Part 4 Routes
+const analyticsRoutes = require('./analyticsRoutes');
+const notificationRoutes = require('./notificationRoutes');
+
 // Health check endpoint
 router.get('/health', (req, res) => {
     res.status(200).json({
@@ -52,5 +56,10 @@ router.use('/events', eventRoutes);
 router.use('/scheduling', schedulingRoutes);
 router.use('/reservations', reservationRoutes);
 
+// Mount Part 4 routes
+router.use('/analytics', analyticsRoutes);
+router.use('/notifications', notificationRoutes);
+
 module.exports = router;
+
 

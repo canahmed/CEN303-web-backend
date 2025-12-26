@@ -27,6 +27,10 @@ const EventRegistration = require('./EventRegistration')(sequelize);
 const Schedule = require('./Schedule')(sequelize);
 const ClassroomReservation = require('./ClassroomReservation')(sequelize);
 
+// Part 4 Models
+const Notification = require('./Notification');
+const NotificationPreferences = require('./NotificationPreferences');
+
 // ==========================================
 // Part 1 Associations
 // ==========================================
@@ -423,6 +427,9 @@ module.exports = {
     Event,
     EventRegistration,
     Schedule,
-    ClassroomReservation
+    ClassroomReservation,
+    // Part 4 Models
+    Notification,
+    NotificationPreferences
 };
 
