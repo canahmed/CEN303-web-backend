@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 // Password regex: min 8 chars, 1 uppercase, 1 lowercase, 1 number
 // Allowed special chars: @$!%*?&._-,
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&._\-,]{8,}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-,])[a-zA-Z\d@$!%*?&._\-,]{8,}$/;
 
 const registerSchema = Joi.object({
     email: Joi.string()
@@ -16,7 +16,7 @@ const registerSchema = Joi.object({
         .pattern(passwordRegex)
         .required()
         .messages({
-            'string.pattern.base': 'Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf ve 1 rakam içermelidir',
+            'string.pattern.base': 'Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter (@$!%*?&._-,) içermelidir',
             'any.required': 'Şifre zorunludur'
         }),
     confirmPassword: Joi.string()
