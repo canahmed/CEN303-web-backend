@@ -33,10 +33,10 @@ const changePasswordSchema = Joi.object({
             'any.required': 'Mevcut şifre zorunludur'
         }),
     newPassword: Joi.string()
-        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/)
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-,])[a-zA-Z\d@$!%*?&._\-,]{8,}$/)
         .required()
         .messages({
-            'string.pattern.base': 'Yeni şifre en az 8 karakter, 1 büyük harf, 1 küçük harf ve 1 rakam içermelidir',
+            'string.pattern.base': 'Yeni şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter (@$!%*?&._-,) içermelidir',
             'any.required': 'Yeni şifre zorunludur'
         }),
     confirmPassword: Joi.string()
