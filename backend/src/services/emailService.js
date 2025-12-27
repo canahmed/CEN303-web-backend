@@ -22,38 +22,36 @@ const sendEmail = async ({ to, subject, text, html }) => {
     return { id: 'skipped' };
   }
 
-  // Test mode: Resend free tier only allows sending to verified email
-  // In development/test, override recipient to verified test email
-  const isTestMode = process.env.NODE_ENV !== 'production';
-  const testEmail = 'canahmed@icloud.com'; // Verified email in Resend
-  const actualRecipient = to;
-  const emailRecipient = isTestMode ? testEmail : to;
+  // IMPORTANT: Resend free tier only allows sending to verified email (canahmed@icloud.com)
+  // Until domain is verified at resend.com/domains, all emails go to this address
+  const verifiedEmail = 'canahmed@icloud.com';
+  const originalRecipient = to;
+  const actualRecipient = verifiedEmail; // Always use verified email
 
   console.log('📧 Attempting to send email via Resend...');
-  console.log('   Mode:', isTestMode ? 'TEST (redirecting to verified email)' : 'PRODUCTION');
-  console.log('   Original recipient:', actualRecipient);
-  if (isTestMode) {
-    console.log('   ⚠️ TEST MODE: Email will be sent to:', emailRecipient);
-  } else {
-    console.log('   To:', emailRecipient);
-  }
+  console.log('   Original recipient:', originalRecipient);
+  console.log('   ⚠️ RESEND TEST MODE: Email will be sent to verified address:', actualRecipient);
   console.log('   Subject:', subject);
   console.log('   API Key present:', process.env.RESEND_API_KEY ? 'Yes' : 'No');
+  console.log('   💡 To send to other emails, verify a domain at resend.com/domains');
 
   try {
     const { data, error } = await resend.emails.send({
       from: 'Smart Campus <onboarding@resend.dev>',
-      to: [emailRecipient],
-      subject: isTestMode ? `[TEST - ${actualRecipient}] ${subject}` : subject,
+      to: [actualRecipient],
+      subject: `[FOR: ${originalRecipient}] ${subject}`,
       text,
-      html: isTestMode ? `
-        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin-bottom: 20px;">
-          <strong>⚠️ TEST MODE</strong><br>
-          This email was originally intended for: <strong>${actualRecipient}</strong><br>
-          In production, it will be sent to the actual recipient.
+      html: `
+        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+          <strong>⚠️ RESEND TEST MODE</strong><br>
+          <p style="margin: 10px 0;">This email was originally intended for: <strong>${originalRecipient}</strong></p>
+          <p style="margin: 10px 0; font-size: 12px;">
+            Resend free tier only allows sending to verified email addresses.<br>
+            To send to actual recipients, verify a domain at <a href="https://resend.com/domains">resend.com/domains</a>
+          </p>
         </div>
         ${html}
-      ` : html
+      `
     });
 
     if (error) {
@@ -63,9 +61,8 @@ const sendEmail = async ({ to, subject, text, html }) => {
 
     console.log('✅ Email sent successfully!');
     console.log('   Email ID:', data.id);
-    if (isTestMode) {
-      console.log('   💡 Remember: In production, emails will go to actual recipients');
-    }
+    console.log('   Sent to:', actualRecipient);
+    console.log('   Original recipient was:', originalRecipient);
     return data;
   } catch (err) {
     console.error('❌ Email service error:', err.message);
