@@ -38,7 +38,14 @@ services:
       JWT_SECRET: your-super-secret-jwt-key-min-32-chars-for-production
       JWT_ACCESS_EXPIRY: 15m
       JWT_REFRESH_EXPIRY: 7d
-      FRONTEND_URL: http://localhost:5173,https://your-vercel-domain.vercel.app
+      FRONTEND_URL: http://localhost:5173,https://web303-frontend.vercel.app
+      # Email Configuration (using Resend for email delivery)
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USER: noreply@smartcampus.com
+      EMAIL_PASSWORD: dummy_password
+      EMAIL_FROM: noreply@smartcampus.com
+      RESEND_API_KEY: re_N7MMuvXo_KU68R3YDwKt8Y8CXSZeJVR4t
     depends_on:
       postgres:
         condition: service_healthy

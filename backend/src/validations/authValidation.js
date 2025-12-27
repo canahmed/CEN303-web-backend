@@ -1,7 +1,8 @@
 const Joi = require('joi');
 
 // Password regex: min 8 chars, 1 uppercase, 1 lowercase, 1 number
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+// Allowed special chars: @$!%*?&._-,
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&._\-,]{8,}$/;
 
 const registerSchema = Joi.object({
     email: Joi.string()
