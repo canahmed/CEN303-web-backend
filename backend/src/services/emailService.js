@@ -13,29 +13,42 @@ const resend = new Resend(process.env.RESEND_API_KEY);
  * @param {string} options.html - HTML body
  */
 const sendEmail = async ({ to, subject, text, html }) => {
-    // If no API key, log and skip
-    if (!process.env.RESEND_API_KEY) {
-        console.log('⚠️ RESEND_API_KEY not configured, skipping email');
-        console.log('📧 Email would be sent to:', to);
-        console.log('📧 Subject:', subject);
-        return { id: 'skipped' };
-    }
+  // If no API key, log and skip
+  if (!process.env.RESEND_API_KEY) {
+    console.log('⚠️ RESEND_API_KEY not configured, skipping email');
+    console.log('📧 Email would be sent to:', to);
+    console.log('📧 Subject:', subject);
+    console.log('💡 Tip: Set RESEND_API_KEY environment variable in Render dashboard');
+    return { id: 'skipped' };
+  }
 
+  console.log('📧 Attempting to send email via Resend...');
+  console.log('   To:', to);
+  console.log('   Subject:', subject);
+  console.log('   API Key present:', process.env.RESEND_API_KEY ? 'Yes' : 'No');
+
+  try {
     const { data, error } = await resend.emails.send({
-        from: 'Smart Campus <onboarding@resend.dev>',
-        to: [to],
-        subject,
-        text,
-        html
+      from: 'Smart Campus <onboarding@resend.dev>',
+      to: [to],
+      subject,
+      text,
+      html
     });
 
     if (error) {
-        console.error('❌ Resend error:', error);
-        throw new Error(error.message);
+      console.error('❌ Resend API error:', JSON.stringify(error, null, 2));
+      throw new Error(`Email send failed: ${error.message || JSON.stringify(error)}`);
     }
 
-    console.log('✅ Email sent successfully:', data.id);
+    console.log('✅ Email sent successfully!');
+    console.log('   Email ID:', data.id);
     return data;
+  } catch (err) {
+    console.error('❌ Email service error:', err.message);
+    console.error('   Stack:', err.stack);
+    throw err;
+  }
 };
 
 /**
@@ -45,14 +58,14 @@ const sendEmail = async ({ to, subject, text, html }) => {
  * @param {string} token - Verification token
  */
 const sendVerificationEmail = async (to, name, token) => {
-    const verificationUrl = `${config.frontendUrl}/verify-email/${token}`;
+  const verificationUrl = `${config.frontendUrl}/verify-email/${token}`;
 
-    // Log the verification link
-    console.log('📧 Email verification link:', verificationUrl);
+  // Log the verification link
+  console.log('📧 Email verification link:', verificationUrl);
 
-    const subject = 'Smart Campus - Email Doğrulama';
-    const text = `Merhaba ${name},\n\nEmail adresinizi doğrulamak için aşağıdaki linke tıklayın:\n${verificationUrl}\n\nBu link 24 saat geçerlidir.`;
-    const html = `
+  const subject = 'Smart Campus - Email Doğrulama';
+  const text = `Merhaba ${name},\n\nEmail adresinizi doğrulamak için aşağıdaki linke tıklayın:\n${verificationUrl}\n\nBu link 24 saat geçerlidir.`;
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #2c3e50;">Smart Campus - Email Doğrulama</h2>
       <p>Merhaba <strong>${name}</strong>,</p>
@@ -66,7 +79,7 @@ const sendVerificationEmail = async (to, name, token) => {
     </div>
   `;
 
-    return sendEmail({ to, subject, text, html });
+  return sendEmail({ to, subject, text, html });
 };
 
 /**
@@ -76,11 +89,11 @@ const sendVerificationEmail = async (to, name, token) => {
  * @param {string} token - Reset token
  */
 const sendPasswordResetEmail = async (to, name, token) => {
-    const resetUrl = `${config.frontendUrl}/reset-password/${token}`;
+  const resetUrl = `${config.frontendUrl}/reset-password/${token}`;
 
-    const subject = 'Smart Campus - Şifre Sıfırlama';
-    const text = `Merhaba ${name},\n\nŞifrenizi sıfırlamak için aşağıdaki linke tıklayın:\n${resetUrl}\n\nBu link 1 saat geçerlidir.`;
-    const html = `
+  const subject = 'Smart Campus - Şifre Sıfırlama';
+  const text = `Merhaba ${name},\n\nŞifrenizi sıfırlamak için aşağıdaki linke tıklayın:\n${resetUrl}\n\nBu link 1 saat geçerlidir.`;
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #2c3e50;">Smart Campus - Şifre Sıfırlama</h2>
       <p>Merhaba <strong>${name}</strong>,</p>
@@ -94,11 +107,11 @@ const sendPasswordResetEmail = async (to, name, token) => {
     </div>
   `;
 
-    return sendEmail({ to, subject, text, html });
+  return sendEmail({ to, subject, text, html });
 };
 
 module.exports = {
-    sendEmail,
-    sendVerificationEmail,
-    sendPasswordResetEmail
+  sendEmail,
+  sendVerificationEmail,
+  sendPasswordResetEmail
 };

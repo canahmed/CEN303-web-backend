@@ -42,14 +42,8 @@ module.exports = {
         refreshExpiry: process.env.JWT_REFRESH_EXPIRY || '7d'
     },
 
-    // Email Configuration
-    email: {
-        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.EMAIL_PORT, 10) || 587,
-        user: process.env.EMAIL_USER,
-        password: process.env.EMAIL_PASSWORD,
-        from: process.env.EMAIL_FROM || 'noreply@smartcampus.com'
-    },
+    // Resend API Configuration (for email delivery)
+    resendApiKey: process.env.RESEND_API_KEY,
 
     // File Upload Configuration
     upload: {
