@@ -22,18 +22,38 @@ const sendEmail = async ({ to, subject, text, html }) => {
     return { id: 'skipped' };
   }
 
+  // Test mode: Resend free tier only allows sending to verified email
+  // In development/test, override recipient to verified test email
+  const isTestMode = process.env.NODE_ENV !== 'production';
+  const testEmail = 'canahmed@icloud.com'; // Verified email in Resend
+  const actualRecipient = to;
+  const emailRecipient = isTestMode ? testEmail : to;
+
   console.log('📧 Attempting to send email via Resend...');
-  console.log('   To:', to);
+  console.log('   Mode:', isTestMode ? 'TEST (redirecting to verified email)' : 'PRODUCTION');
+  console.log('   Original recipient:', actualRecipient);
+  if (isTestMode) {
+    console.log('   ⚠️ TEST MODE: Email will be sent to:', emailRecipient);
+  } else {
+    console.log('   To:', emailRecipient);
+  }
   console.log('   Subject:', subject);
   console.log('   API Key present:', process.env.RESEND_API_KEY ? 'Yes' : 'No');
 
   try {
     const { data, error } = await resend.emails.send({
       from: 'Smart Campus <onboarding@resend.dev>',
-      to: [to],
-      subject,
+      to: [emailRecipient],
+      subject: isTestMode ? `[TEST - ${actualRecipient}] ${subject}` : subject,
       text,
-      html
+      html: isTestMode ? `
+        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin-bottom: 20px;">
+          <strong>⚠️ TEST MODE</strong><br>
+          This email was originally intended for: <strong>${actualRecipient}</strong><br>
+          In production, it will be sent to the actual recipient.
+        </div>
+        ${html}
+      ` : html
     });
 
     if (error) {
@@ -43,6 +63,9 @@ const sendEmail = async ({ to, subject, text, html }) => {
 
     console.log('✅ Email sent successfully!');
     console.log('   Email ID:', data.id);
+    if (isTestMode) {
+      console.log('   💡 Remember: In production, emails will go to actual recipients');
+    }
     return data;
   } catch (err) {
     console.error('❌ Email service error:', err.message);
