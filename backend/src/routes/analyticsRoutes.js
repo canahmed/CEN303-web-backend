@@ -2,10 +2,29 @@ const express = require('express');
 const router = express.Router();
 const analyticsController = require('../controllers/analyticsController');
 const { authenticate, authorize } = require('../middleware/auth');
+const ApiError = require('../utils/ApiError');
 
 // ==========================================
 // Analytics Routes (Admin Only)
 // ==========================================
+
+const allowFacultyAnalytics = authorize('admin', 'faculty');
+
+const allowAnalyticsExport = (req, res, next) => {
+    const { role } = req.user || {};
+    const { type } = req.params;
+    const facultyAllowedTypes = new Set(['academic', 'attendance']);
+
+    if (role === 'admin') {
+        return next();
+    }
+
+    if (role === 'faculty' && facultyAllowedTypes.has(type)) {
+        return next();
+    }
+
+    return next(ApiError.forbidden('Bu islem icin yetkiniz yok'));
+};
 
 /**
  * @swagger
@@ -33,7 +52,7 @@ router.get('/dashboard', authenticate, authorize('admin'), analyticsController.g
  *       200:
  *         description: Academic performance data
  */
-router.get('/academic-performance', authenticate, authorize('admin'), analyticsController.getAcademicPerformance);
+router.get('/academic-performance', authenticate, allowFacultyAnalytics, analyticsController.getAcademicPerformance);
 
 /**
  * @swagger
@@ -47,7 +66,7 @@ router.get('/academic-performance', authenticate, authorize('admin'), analyticsC
  *       200:
  *         description: Attendance analytics data
  */
-router.get('/attendance', authenticate, authorize('admin'), analyticsController.getAttendance);
+router.get('/attendance', authenticate, allowFacultyAnalytics, analyticsController.getAttendance);
 
 /**
  * @swagger
@@ -102,6 +121,6 @@ router.get('/events', authenticate, authorize('admin'), analyticsController.getE
  *       200:
  *         description: Exported report
  */
-router.get('/export/:type', authenticate, authorize('admin'), analyticsController.exportReport);
+router.get('/export/:type', authenticate, allowAnalyticsExport, analyticsController.exportReport);
 
 module.exports = router;
