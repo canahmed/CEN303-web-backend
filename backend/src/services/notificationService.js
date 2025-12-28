@@ -27,11 +27,25 @@ class NotificationService {
         });
 
         return {
-            notifications: rows,
-            total: count,
-            page: parseInt(page),
-            limit: parseInt(limit),
-            totalPages: Math.ceil(count / limit)
+            notifications: rows.map(n => ({
+                id: n.id,
+                userId: n.user_id,
+                type: n.type,
+                title: n.title,
+                message: n.message,
+                actionUrl: n.link,
+                isRead: n.is_read,
+                readAt: n.read_at,
+                metadata: n.metadata,
+                createdAt: n.created_at,
+                updatedAt: n.updated_at
+            })),
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total: count,
+                totalPages: Math.ceil(count / limit)
+            }
         };
     }
 
@@ -64,7 +78,19 @@ class NotificationService {
         notification.read_at = new Date();
         await notification.save();
 
-        return notification;
+        return {
+            id: notification.id,
+            userId: notification.user_id,
+            type: notification.type,
+            title: notification.title,
+            message: notification.message,
+            actionUrl: notification.link,
+            isRead: notification.is_read,
+            readAt: notification.read_at,
+            metadata: notification.metadata,
+            createdAt: notification.created_at,
+            updatedAt: notification.updated_at
+        };
     }
 
     /**
@@ -153,35 +179,93 @@ class NotificationService {
 
     /**
      * Create a notification (for internal use)
+     * Respects user notification preferences
      */
     async createNotification(userId, data) {
+        const type = data.type || 'system';
+        
+        // Get user preferences to check if they want this notification
+        const preferences = await this.getPreferences(userId);
+        
+        // Check if user wants push/in-app notifications for this type
+        const wantsPush = preferences.push_preferences?.[type] !== false;
+        
+        if (!wantsPush && !data.force) {
+            // User disabled this notification type, skip creating
+            return null;
+        }
+
         const notification = await Notification.create({
             user_id: userId,
-            type: data.type || 'system',
+            type: type,
             title: data.title,
             message: data.message,
-            link: data.link,
+            link: data.link || data.actionUrl,
             metadata: data.metadata
         });
 
-        return notification;
+        // TODO: If email preference enabled, send email
+        // const wantsEmail = preferences.email_preferences?.[type] !== false;
+        // if (wantsEmail && data.sendEmail) {
+        //     await emailService.sendNotificationEmail(userId, notification);
+        // }
+
+        return {
+            id: notification.id,
+            userId: notification.user_id,
+            type: notification.type,
+            title: notification.title,
+            message: notification.message,
+            actionUrl: notification.link,
+            isRead: notification.is_read,
+            metadata: notification.metadata,
+            createdAt: notification.created_at
+        };
     }
 
     /**
      * Send notification to multiple users (batch)
+     * Respects user notification preferences
      */
     async sendBulkNotification(userIds, data) {
-        const notifications = userIds.map(userId => ({
+        const type = data.type || 'system';
+        
+        // Get all user preferences at once for efficiency
+        const allPreferences = await NotificationPreferences.findAll({
+            where: { user_id: userIds }
+        });
+        
+        const preferencesMap = new Map(
+            allPreferences.map(p => [p.user_id, p])
+        );
+        
+        // Filter users who want this notification type
+        const eligibleUserIds = userIds.filter(userId => {
+            const prefs = preferencesMap.get(userId);
+            // If no preferences, default to true (send notification)
+            if (!prefs) return true;
+            return prefs.push_preferences?.[type] !== false;
+        });
+        
+        if (eligibleUserIds.length === 0) {
+            return { message: 'Hiçbir kullanıcı bu bildirim tipini almak istemiyor', sent: 0 };
+        }
+
+        const notifications = eligibleUserIds.map(userId => ({
             user_id: userId,
-            type: data.type || 'system',
+            type: type,
             title: data.title,
             message: data.message,
-            link: data.link,
+            link: data.link || data.actionUrl,
             metadata: data.metadata
         }));
 
         await Notification.bulkCreate(notifications);
-        return { message: `${userIds.length} kullanıcıya bildirim gönderildi` };
+        return { 
+            message: `${eligibleUserIds.length} kullanıcıya bildirim gönderildi`,
+            sent: eligibleUserIds.length,
+            skipped: userIds.length - eligibleUserIds.length
+        };
     }
 }
 

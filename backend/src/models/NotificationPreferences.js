@@ -41,8 +41,12 @@ module.exports = (sequelize) => {
         sms_preferences: {
             type: DataTypes.JSONB,
             defaultValue: {
+                academic: false,
                 attendance: false,
-                payment: false
+                meal: false,
+                event: false,
+                payment: false,
+                system: false
             }
         }
     }, {
