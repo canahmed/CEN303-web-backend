@@ -2,6 +2,14 @@
 
 Akıllı Kampüs Ekosistem Yönetim Platformu - Backend API
 
+## 🌐 Canlı Demo
+
+| Servis | URL |
+|--------|-----|
+| **Backend API** | https://cen303-web-backend.onrender.com |
+| **Swagger Docs** | https://cen303-web-backend.onrender.com/swagger |
+| **Frontend** | https://web303-frontend.vercel.app |
+
 ## 🚀 Teknoloji Stack
 
 - **Runtime:** Node.js 18+
@@ -12,7 +20,7 @@ Akıllı Kampüs Ekosistem Yönetim Platformu - Backend API
 - **Password Hashing:** bcrypt (10 salt rounds)
 - **Validation:** Joi
 - **File Upload:** Multer
-- **Email:** NodeMailer
+- **Email:** NodeMailer / Resend
 
 ## 📁 Proje Yapısı
 
@@ -133,6 +141,29 @@ Backend çalışırken Swagger UI üzerinden interaktif API dokümantasyonuna er
 | GET | `/` | Kullanıcı listesi (admin) |
 | GET | `/:id` | Kullanıcı detayı (admin) |
 
+### Analytics (`/api/v1/analytics`) - Admin Only
+
+| Method | Endpoint | Açıklama |
+|--------|----------|----------|
+| GET | `/dashboard` | Dashboard istatistikleri |
+| GET | `/academic-performance` | Akademik performans |
+| GET | `/attendance` | Yoklama analitiği |
+| GET | `/meal-usage` | Yemek kullanım raporları |
+| GET | `/events` | Etkinlik analitiği |
+| GET | `/export/:type` | Rapor export (CSV/JSON) |
+
+### Notifications (`/api/v1/notifications`)
+
+| Method | Endpoint | Açıklama |
+|--------|----------|----------|
+| GET | `/` | Bildirim listesi |
+| GET | `/unread-count` | Okunmamış sayısı |
+| PUT | `/:id/read` | Okundu işaretle |
+| PUT | `/mark-all-read` | Hepsini okundu işaretle |
+| DELETE | `/:id` | Bildirim sil |
+| GET | `/preferences` | Tercihler |
+| PUT | `/preferences` | Tercihleri güncelle |
+
 ## 🧪 Test
 
 ```bash
@@ -156,7 +187,10 @@ npm run test:integration
 
 ## 👥 Ekip
 
-Smart Campus Development Team
+| İsim | Rol | GitHub |
+|------|-----|--------|
+| Can Ahmed | Backend & Database | @canahmed |
+| Fırat Atalay | Frontend | @mrfiratatalay |
 
 ## 📄 Lisans
 
@@ -168,3 +202,4 @@ MIT License
 - Örnek: `FRONTEND_URL=http://localhost:5173,https://your-vercel-domain.vercel.app`
 - Yeni bir frontend (Vercel domaini gibi) eklendiğinde bu listeye ekleyin; aksi halde CORS hata verir.
 - Lokal backend taban URL: `http://localhost:5000/api/v1` (PORT=5000, path `/api/v1`).
+
